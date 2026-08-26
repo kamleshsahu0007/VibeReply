@@ -27,3 +27,6 @@ prisma/*.db-journal
 next-env.d.ts.bak
 prisma/prisma/*.db
 prisma/prisma/*.db-journal
+
+.vercel
+.env*
