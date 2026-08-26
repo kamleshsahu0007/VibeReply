@@ -1,0 +1,63 @@
+{
+  "manifest_version": 3,
+  "name": "VibeReply",
+  "short_name": "VibeReply",
+  "version": "1.0.0",
+  "description": "Contextual AI reply and rewrite assistant for WhatsApp Web and LinkedIn messaging. Reads only currently visible messages. No auto-send. No automation.",
+  "minimum_chrome_version": "116",
+
+  "action": {
+    "default_title": "VibeReply",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["lib/languages.js", "lib/storage.js", "content.js"],
+      "run_at": "document_idle",
+      "all_frames": true,
+      "world": "ISOLATED"
+    }
+  ],
+
+  "permissions": [
+    "storage",
+    "activeTab",
+    "unlimitedStorage"
+  ],
+
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://api.vibereply.app http://localhost:* http://127.0.0.1:*"
+  },
+
+  "web_accessible_resources": [
+    {
+      "resources": ["styles.css"],
+      "matches": ["http://*/*", "https://*/*"]
+    }
+  ]
+}

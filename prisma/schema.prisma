@@ -1,0 +1,54 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// A single browser-extension install. Identity is anonymous — a random UUID
+// generated client-side and persisted in chrome.storage.sync. There is no
+// login/account system yet; this is the seam a real User model would replace.
+model Device {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  toneProfiles ToneProfile[]
+}
+
+// A tone the reply/rewrite engine can generate in. Rows with deviceId = null
+// are the global defaults shipped with the product. A device that edits a
+// default or creates a new tone gets its own row with the same `key` (for
+// edits) or a generated key (for new tones); lookups merge device rows over
+// the global defaults, keyed by `key`.
+model ToneProfile {
+  id       String  @id @default(uuid())
+  key      String
+  deviceId String?
+  device   Device? @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  name        String
+  description String
+
+  // 0-100 sliders describing the tone's writing characteristics.
+  formality   Int @default(50)
+  warmth      Int @default(50)
+  conciseness Int @default(50)
+  directness  Int @default(50)
+
+  vocabularyStyle String @default("neutral") // simple | neutral | advanced
+  emojiPreference String @default("none") // none | minimal | frequent
+  sentenceStyle   String @default("balanced") // short | balanced | flowing
+
+  customInstructions String?
+
+  isCustom  Boolean @default(false)
+  isActive  Boolean @default(true)
+  sortOrder Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([deviceId, key])
+}

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VibeReply</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="popup" data-theme="dark">
+  <header class="popup-header">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+        </svg>
+      </span>
+      <span class="brand-name">VibeReply</span>
+    </div>
+
+    <div class="header-actions">
+      <button id="refresh-btn" class="icon-btn" title="Refresh visible messages" aria-label="Refresh">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="23 4 23 10 17 10"/>
+          <polyline points="1 20 1 14 7 14"/>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+        </svg>
+      </button>
+      <button id="settings-btn" class="icon-btn" title="Tone settings" aria-label="Tone settings">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
+      <span id="status-dot" class="status-dot" data-state="unknown" title="Connection status"></span>
+    </div>
+  </header>
+
+  <div id="status-bar" class="status-bar" data-visible="false" aria-live="polite"></div>
+
+  <div id="mode-tabs" class="mode-tabs">
+    <button id="tab-reply" class="mode-tab is-active" type="button">✨ Reply</button>
+    <button id="tab-rewrite" class="mode-tab" type="button">✨ Rewrite</button>
+  </div>
+
+  <div id="partner-tone-bar" class="partner-tone-bar" data-visible="false">
+    <span class="partner-tone-label">Their tone</span>
+    <select id="partner-tone-select" class="partner-tone-select"></select>
+  </div>
+
+  <main id="main" class="popup-main" data-visible="true">
+    <!-- Empty state -->
+    <section id="state-empty" class="state state-empty" data-visible="false">
+      <div class="state-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+      </div>
+      <h2 class="state-title">Open a chat to begin</h2>
+      <p class="state-desc">VibeReply reads only the currently visible messages from your open WhatsApp Web or LinkedIn chat.</p>
+      <button id="open-platform" class="btn btn-primary">Open WhatsApp Web</button>
+    </section>
+
+    <!-- Error state -->
+    <section id="state-error" class="state state-error" data-visible="false">
+      <div class="state-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+      <h2 class="state-title">Something went wrong</h2>
+      <p id="error-message" class="state-desc">Please try again.</p>
+      <button id="retry-btn" class="btn btn-primary">Try again</button>
+    </section>
+
+    <!-- Loading skeleton -->
+    <section id="state-loading" class="state state-loading" data-visible="false" aria-hidden="true">
+      <div class="skeleton-card"><div class="skel-label"></div><div class="skel-line"></div><div class="skel-line short"></div></div>
+      <div class="skeleton-card"><div class="skel-label"></div><div class="skel-line"></div><div class="skel-line short"></div></div>
+      <div class="skeleton-card"><div class="skel-label"></div><div class="skel-line"></div><div class="skel-line short"></div></div>
+    </section>
+
+    <!-- Suggestions list (rendered dynamically) -->
+    <section id="state-replies" class="state state-replies" data-visible="false">
+      <ul id="reply-list" class="reply-list" role="list"></ul>
+    </section>
+  </main>
+
+  <!-- Tone settings view -->
+  <section id="settings-view" class="settings-view" data-visible="false">
+    <div class="settings-header">
+      <button id="back-btn" class="icon-btn" title="Back" aria-label="Back">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </button>
+      <h2>Reply tones</h2>
+    </div>
+    <ul id="tone-list" class="tone-list" role="list"></ul>
+
+    <div class="new-tone-form">
+      <h3>Create a custom tone</h3>
+      <input id="new-tone-name" class="tone-input" type="text" placeholder="Name (e.g. Sarcastic)" maxlength="60" />
+      <textarea id="new-tone-desc" class="tone-textarea" placeholder="Describe how it should sound…" maxlength="300"></textarea>
+      <button id="add-tone-btn" class="btn btn-primary">Add tone</button>
+    </div>
+
+    <div class="settings-section">
+      <h3>Language settings</h3>
+      <label class="settings-field">
+        My language
+        <select id="my-language-select" class="settings-select"></select>
+      </label>
+      <label class="settings-checkbox">
+        <input id="auto-detect-partner-language" type="checkbox" /> Automatically detect partner language
+      </label>
+      <label class="settings-checkbox">
+        <input id="show-translation-auto" type="checkbox" /> Show translation automatically
+      </label>
+      <label class="settings-checkbox">
+        <input id="show-original-message" type="checkbox" /> Show original message
+      </label>
+    </div>
+
+    <div class="settings-section">
+      <h3>Conversation history</h3>
+      <label class="settings-checkbox">
+        <input id="store-conversation-locally" type="checkbox" /> Store conversation locally
+      </label>
+      <label class="settings-field">
+        Maximum stored history
+        <select id="max-stored-history-select" class="settings-select">
+          <option value="100">100 messages</option>
+          <option value="500">500 messages</option>
+          <option value="1000">1000 messages</option>
+          <option value="all">All available</option>
+        </select>
+      </label>
+      <label class="settings-checkbox">
+        <input id="auto-load-older-messages" type="checkbox" /> Automatically load older messages
+      </label>
+    </div>
+
+    <div class="settings-section">
+      <h3>Privacy</h3>
+      <button id="clear-conversation-btn" class="btn btn-ghost">Clear this conversation</button>
+      <button id="clear-all-conversations-btn" class="btn btn-ghost">Clear all stored conversations</button>
+    </div>
+  </section>
+
+  <footer class="popup-footer">
+    <span id="footer-meta" class="footer-meta"></span>
+    <span id="toast" class="toast" data-visible="false" role="status" aria-live="polite"></span>
+  </footer>
+
+  <template id="reply-card-template">
+    <li class="reply-card" data-tone="">
+      <header class="reply-head">
+        <span class="tone-badge">
+          <span class="tone-dot"></span>
+          <span class="tone-name"></span>
+        </span>
+        <div class="reply-actions">
+          <button class="icon-btn copy-btn" title="Copy" aria-label="Copy reply">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            </svg>
+          </button>
+          <button class="icon-btn regenerate-btn" title="Regenerate" aria-label="Regenerate reply">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="23 4 23 10 17 10"/>
+              <path d="M20.49 15A9 9 0 1 1 5.64 5.64L23 10"/>
+            </svg>
+          </button>
+        </div>
+      </header>
+      <p class="reply-text"></p>
+      <button class="btn btn-primary use-btn">Insert</button>
+    </li>
+  </template>
+
+  <template id="tone-edit-template">
+    <li class="tone-edit-row">
+      <div class="tone-edit-fields">
+        <input class="tone-name-input" type="text" maxlength="60" />
+        <span class="tone-custom-badge">custom</span>
+        <textarea class="tone-desc-input" maxlength="300"></textarea>
+        <label class="tone-active-label">
+          <input class="tone-active-input" type="checkbox" /> Active
+        </label>
+      </div>
+      <div class="tone-edit-actions">
+        <button class="btn tone-save-btn">Save</button>
+        <button class="btn btn-ghost tone-delete-btn">Delete</button>
+      </div>
+    </li>
+  </template>
+
+  <script src="lib/languages.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
