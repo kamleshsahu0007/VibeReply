@@ -154,6 +154,39 @@ html, body {
 .status-dot[data-state='ok']   { background: var(--success); box-shadow: 0 0 8px rgba(0,168,132,0.6); }
 .status-dot[data-state='down'] { background: var(--danger); }
 
+/* --------------------------- Stats card --------------------------- */
+.stats-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--fg-muted);
+  padding: 0 14px;
+  height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: height var(--t-base) var(--ease), padding var(--t-base) var(--ease), opacity var(--t-base) var(--ease);
+  background: var(--surface-2);
+  border-bottom: 1px solid transparent;
+}
+.stats-card[data-visible='true'] {
+  height: 30px;
+  padding: 7px 14px;
+  opacity: 1;
+  border-bottom-color: var(--border);
+}
+.stats-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+.stats-sep {
+  color: var(--fg-faint);
+}
+
 /* --------------------------- Status bar --------------------------- */
 .status-bar {
   font-size: 11px;

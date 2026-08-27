@@ -51,6 +51,7 @@ const MSG = Object.freeze({
   DELETE_TONE: 'DELETE_TONE',
   CLEAR_ALL_CONVERSATIONS: 'CLEAR_ALL_CONVERSATIONS',
   OPEN_CHECKOUT: 'OPEN_CHECKOUT',
+  GET_STATS: 'GET_STATS',
   PING: 'PING',
 });
 
@@ -146,6 +147,10 @@ function anySignal(signals) {
   return ctrl.signal;
 }
 
+function countWords(text) {
+  return typeof text === 'string' ? (text.trim().match(/\S+/g) || []).length : 0;
+}
+
 /* --------------------------- Request handlers --------------------------- */
 
 // payload: { task: 'reply'|'rewrite', messages, draft?, partnerTone?, toneKeys?, userLanguage?, partnerLanguage? }
@@ -175,7 +180,11 @@ async function handleGenerate(payload) {
     if (!data?.success) {
       return { ok: false, error: data?.error?.message || 'generation_failed' };
     }
-    await VRTrial.recordUsage('reply');
+    const wordCount = Object.values(data.replies || {}).reduce(
+      (sum, variant) => sum + countWords(variant?.text),
+      0
+    );
+    await VRTrial.recordUsage('reply', wordCount);
     return { ok: true, data }; // data: { success, replies, meta }
   } catch (err) {
     if (err instanceof ApiError && err.status === 401) {
@@ -213,7 +222,7 @@ async function handleTranslate(payload) {
     if (!data?.success) {
       return { ok: false, error: data?.error?.message || 'translation_failed' };
     }
-    await VRTrial.recordUsage('translation');
+    await VRTrial.recordUsage('translation', countWords(data.translatedText));
     return { ok: true, data }; // data: { success, translatedText, meta }
   } catch (err) {
     if (err instanceof ApiError && err.status === 401) {
@@ -359,6 +368,17 @@ async function handleOpenCheckout() {
   return { ok: true };
 }
 
+// Habit-analytics stats card (streak, words generated, time saved) — pure
+// chrome.storage.local reads via VRTrial, no network call.
+async function handleGetStats() {
+  try {
+    const data = await VRTrial.getStats();
+    return { ok: true, data };
+  } catch (err) {
+    return { ok: false, error: err?.message || 'stats_failed' };
+  }
+}
+
 /* --------------------------- Message dispatcher ------------------------- */
 const ROUTES = {
   [MSG.GENERATE]: (p) => handleGenerate(p),
@@ -371,6 +391,7 @@ const ROUTES = {
   [MSG.DELETE_TONE]: (p) => handleDeleteTone(p),
   [MSG.CLEAR_ALL_CONVERSATIONS]: () => handleClearAllConversations(),
   [MSG.OPEN_CHECKOUT]: () => handleOpenCheckout(),
+  [MSG.GET_STATS]: () => handleGetStats(),
   [MSG.PING]: () => ({ ok: true, data: { pong: Date.now() } }),
 };
 
@@ -398,7 +419,7 @@ chrome.runtime.onInstalled.addListener(async ({ reason }) => {
   if (reason === 'install') {
     await chrome.storage.sync.set({ preferences: DEFAULT_PREFS });
     await getDeviceId(); // seed identity up-front
-    await VRTrial.ensureInstallState(); // starts the 7-day PRO trial clock
+    await VRTrial.ensureInstallState(); // starts the PRO trial clock (VRTrial.TRIAL_DAYS)
   }
 });
 

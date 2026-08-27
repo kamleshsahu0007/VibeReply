@@ -39,6 +39,7 @@
     GET_PREFS: 'GET_PREFERENCES',
     SET_PREFS: 'SET_PREFERENCES',
     CLEAR_ALL_CONVERSATIONS: 'CLEAR_ALL_CONVERSATIONS',
+    GET_STATS: 'GET_STATS',
     PING: 'PING',
   });
 
@@ -55,6 +56,9 @@
   const els = {
     statusDot:    $('status-dot'),
     statusBar:    $('status-bar'),
+    statsCard:    $('stats-card'),
+    statsStreakValue: $('stats-streak-value'),
+    statsTimeSavedValue: $('stats-time-saved-value'),
     refreshBtn:   $('refresh-btn'),
     settingsBtn:  $('settings-btn'),
     openPlatform: $('open-platform'),
@@ -663,6 +667,7 @@
       state.detectedPartnerTone = meta?.detectedPartnerTone || null;
       renderRepliesFull(replies);
       renderPartnerToneBar();
+      loadStats(); // this generation just moved the streak/time-saved numbers
 
       setFooterMeta(
         [meta?.model, meta?.latencyMs ? `${meta.latencyMs} ms` : null].filter(Boolean).join(' • ')
@@ -728,6 +733,23 @@
     });
   }
 
+  function formatTimeSaved(minutes) {
+    if (!minutes) return 'No time saved yet';
+    if (minutes < 60) return `${minutes}m Saved This Week`;
+    const hours = Math.floor(minutes / 60);
+    const rem = minutes % 60;
+    return `${hours}h${rem ? ` ${rem}m` : ''} Saved This Week`;
+  }
+
+  async function loadStats() {
+    const res = await sendToBackground(MSG.GET_STATS);
+    if (!res.ok || !res.data) return;
+    const { streak, minutesSavedThisWeek } = res.data;
+    els.statsStreakValue.textContent = streak > 0 ? `${streak}-Day Streak` : 'Start your streak today';
+    els.statsTimeSavedValue.textContent = formatTimeSaved(minutesSavedThisWeek);
+    els.statsCard.dataset.visible = 'true';
+  }
+
   async function init() {
     setStatus('unknown');
     setFooterMeta('');
@@ -740,6 +762,7 @@
     if (prefsRes.ok) state.preferences = prefsRes.data;
 
     await refreshTones();
+    loadStats(); // fire-and-forget, doesn't block the main reply/rewrite flow
     await loadAndGenerate();
   }
 
