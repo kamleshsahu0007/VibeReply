@@ -31,10 +31,17 @@
 
   "content_scripts": [
     {
-      "matches": ["http://*/*", "https://*/*"],
+      "matches": [
+        "https://web.whatsapp.com/*",
+        "https://www.linkedin.com/*",
+        "https://mail.google.com/*",
+        "https://app.slack.com/*",
+        "https://teams.microsoft.com/*",
+        "https://teams.live.com/*"
+      ],
       "js": ["lib/languages.js", "lib/storage.js", "content.js"],
       "run_at": "document_idle",
-      "all_frames": true,
+      "all_frames": false,
       "world": "ISOLATED"
     }
   ],
@@ -46,18 +53,30 @@
   ],
 
   "host_permissions": [
-    "http://*/*",
-    "https://*/*"
+    "https://web.whatsapp.com/*",
+    "https://www.linkedin.com/*",
+    "https://mail.google.com/*",
+    "https://app.slack.com/*",
+    "https://teams.microsoft.com/*",
+    "https://teams.live.com/*",
+    "https://vibe-reply-seven.vercel.app/*"
   ],
 
   "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://api.vibereply.app http://localhost:* http://127.0.0.1:*"
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://vibe-reply-seven.vercel.app http://localhost:* http://127.0.0.1:*"
   },
 
   "web_accessible_resources": [
     {
       "resources": ["styles.css"],
-      "matches": ["http://*/*", "https://*/*"]
+      "matches": [
+        "https://web.whatsapp.com/*",
+        "https://www.linkedin.com/*",
+        "https://mail.google.com/*",
+        "https://app.slack.com/*",
+        "https://teams.microsoft.com/*",
+        "https://teams.live.com/*"
+      ]
     }
   ]
 }

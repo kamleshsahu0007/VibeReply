@@ -6,23 +6,16 @@ import { getActiveToneProfilesForDevice } from "@/services/tones/tone.service";
 import { defaultRateLimiter, getClientKey } from "@/lib/ratelimit";
 import { AppError, RateLimitError, ValidationError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
+import { corsHeaders } from "@/lib/cors";
 import type { ErrorResponse, GenerateRepliesResponse, TranslateResponse } from "@/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || "*";
-
-function corsHeaders(): Record<string, string> {
-  return {
-    "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, X-Device-Id",
-  };
-}
+const CORS = corsHeaders("POST");
 
 export async function OPTIONS() {
-  return new NextResponse(null, { status: 204, headers: corsHeaders() });
+  return new NextResponse(null, { status: 204, headers: CORS });
 }
 
 function errorResponse(
@@ -33,7 +26,7 @@ function errorResponse(
   extraHeaders?: Record<string, string>
 ) {
   const body: ErrorResponse = { success: false, error: { code, message, details } };
-  return NextResponse.json(body, { status, headers: extraHeaders });
+  return NextResponse.json(body, { status, headers: { ...CORS, ...extraHeaders } });
 }
 
 export async function POST(request: Request) {
@@ -84,7 +77,7 @@ export async function POST(request: Request) {
 
       return NextResponse.json(responseBody, {
         status: 200,
-        headers: { ...rateHeaders, ...corsHeaders() },
+        headers: { ...rateHeaders, ...CORS },
       });
     }
 
@@ -122,7 +115,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(responseBody, {
       status: 200,
-      headers: { ...rateHeaders, ...corsHeaders() },
+      headers: { ...rateHeaders, ...CORS },
     });
   } catch (err) {
     const elapsed = Date.now() - startedAt;

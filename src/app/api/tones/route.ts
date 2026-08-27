@@ -3,20 +3,27 @@ import { ZodError } from "zod";
 import { toneProfileInputSchema } from "@/lib/validation/schemas";
 import { getToneProfilesForDevice, upsertDeviceTone } from "@/services/tones/tone.service";
 import { ValidationError } from "@/lib/errors";
+import { corsHeaders } from "@/lib/cors";
 import type { ErrorResponse } from "@/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+const CORS = corsHeaders("GET, POST");
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: CORS });
+}
+
 function errorResponse(code: string, message: string, status: number, details?: unknown) {
   const body: ErrorResponse = { success: false, error: { code, message, details } };
-  return NextResponse.json(body, { status });
+  return NextResponse.json(body, { status, headers: CORS });
 }
 
 export async function GET(request: Request) {
   const deviceId = request.headers.get("x-device-id");
   const tones = await getToneProfilesForDevice(deviceId);
-  return NextResponse.json({ success: true, tones });
+  return NextResponse.json({ success: true, tones }, { headers: CORS });
 }
 
 export async function POST(request: Request) {
@@ -36,7 +43,7 @@ export async function POST(request: Request) {
     const parsed = toneProfileInputSchema.parse(payload);
     const tone = await upsertDeviceTone(deviceId, parsed);
 
-    return NextResponse.json({ success: true, tone }, { status: 200 });
+    return NextResponse.json({ success: true, tone }, { status: 200, headers: CORS });
   } catch (err) {
     if (err instanceof ZodError) {
       return errorResponse(

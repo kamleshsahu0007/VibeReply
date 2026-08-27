@@ -582,16 +582,6 @@
         }
       }, { capture: true });
 
-      // Listen for message broadcasts from extension background
-      if (chrome?.runtime?.onMessage) {
-        chrome.runtime.onMessage.addListener((message) => {
-          if (message.type === 'PREFERENCES_UPDATED') {
-            this.preferences = message.payload;
-            this.state.userLanguage = this.preferences?.myLanguage || 'en';
-            this._renderPanel();
-          }
-        });
-      }
     }
 
     _handleFocus(el) {
@@ -1375,5 +1365,78 @@
     document.addEventListener('DOMContentLoaded', () => controller.init(), { once: true });
   } else {
     controller.init();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Popup / background bridge — the toolbar popup has no DOM access of its
+  // own, so it asks the content script (via chrome.tabs.sendMessage) to read
+  // or write the page on its behalf. The in-page panel above talks to
+  // `activeEditor`/`activeAdapter` tracked from focus events; these handlers
+  // re-derive the adapter and compose box independently since the popup can
+  // be opened without the compose box ever having been focused.
+  // ---------------------------------------------------------------------------
+  function handleExternalMessage(message, sendResponse) {
+    switch (message?.type) {
+      case 'PREFERENCES_UPDATED': {
+        controller.preferences = message.payload;
+        controller.state.userLanguage = controller.preferences?.myLanguage || 'en';
+        controller._renderPanel();
+        return false;
+      }
+      case 'CLEAR_CONVERSATION_DATA':
+      case 'VIBEREPLY_CLEAR_CONVERSATION': {
+        Promise.resolve(window.VRStorage && window.VRStorage.clearAll())
+          .then(() => sendResponse({ ok: true }))
+          .catch((err) => sendResponse({ ok: false, error: err?.message || 'clear_failed' }));
+        return true;
+      }
+      case 'VIBEREPLY_GET_MESSAGES': {
+        try {
+          const adapter = getAdapterForHost();
+          const box = adapter.getComposeBox(document.activeElement);
+          const messages = (adapter.getConversationContext(box) || []).map((m) => ({
+            sender: m.sender,
+            text: scrubPII(m.text),
+            type: m.type,
+          }));
+          sendResponse({ ok: true, messages });
+        } catch (err) {
+          sendResponse({ ok: false, error: err?.message || 'read_failed' });
+        }
+        return false;
+      }
+      case 'VIBEREPLY_GET_DRAFT': {
+        try {
+          const adapter = getAdapterForHost();
+          const box = adapter.getComposeBox(document.activeElement);
+          const draft = box ? (box.value || box.innerText || box.textContent || '').trim() : '';
+          sendResponse({ ok: true, draft });
+        } catch (err) {
+          sendResponse({ ok: false, error: err?.message || 'read_failed' });
+        }
+        return false;
+      }
+      case 'VIBEREPLY_INSERT_TEXT': {
+        try {
+          const adapter = getAdapterForHost();
+          const box = adapter.getComposeBox(document.activeElement);
+          const ok = box
+            ? adapter.insertIntoCompose(box, message.payload?.text || '', { replace: !!message.payload?.replace })
+            : false;
+          sendResponse({ ok });
+        } catch (err) {
+          sendResponse({ ok: false, error: err?.message || 'insert_failed' });
+        }
+        return false;
+      }
+      default:
+        return false;
+    }
+  }
+
+  if (chrome?.runtime?.onMessage) {
+    chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+      return handleExternalMessage(message, sendResponse);
+    });
   }
 })();

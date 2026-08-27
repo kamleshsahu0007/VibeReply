@@ -31,12 +31,22 @@ export async function ensureDevice(deviceId: string): Promise<void> {
   });
 }
 
+// Global defaults are seeded once and never deleted by this code path, so
+// a warm serverless instance can skip the count() check after its first
+// successful confirmation instead of re-querying on every request.
+let globalDefaultsConfirmedSeeded = false;
+
 async function ensureGlobalDefaultsSeeded(): Promise<void> {
+  if (globalDefaultsConfirmedSeeded) return;
   const count = await prisma.toneProfile.count({ where: { deviceId: null } });
-  if (count > 0) return;
+  if (count > 0) {
+    globalDefaultsConfirmedSeeded = true;
+    return;
+  }
   await prisma.toneProfile.createMany({
     data: DEFAULT_TONE_PROFILES.map((t) => ({ ...t, deviceId: null })),
   });
+  globalDefaultsConfirmedSeeded = true;
 }
 
 /**

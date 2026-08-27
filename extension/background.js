@@ -6,7 +6,7 @@
 
 const CONFIG = {
   // Override locally via chrome.storage.local.set({ apiBase: 'http://localhost:3000' })
-  API_BASE: 'http://localhost:3000',
+  API_BASE: 'https://vibe-reply-seven.vercel.app',
   ENDPOINTS: {
     generate: '/api/generate-replies',
     tones: '/api/tones',
@@ -15,6 +15,25 @@ const CONFIG = {
   REQUEST_TIMEOUT_MS: 20_000,
   RATE_LIMIT: { capacity: 5, refillPerSec: 0.5 }, // 5 burst, ~1 every 2s
 };
+
+const SUPPORTED_HOST_PATTERNS = [
+  'https://web.whatsapp.com/*',
+  'https://www.linkedin.com/*',
+  'https://mail.google.com/*',
+  'https://app.slack.com/*',
+  'https://teams.microsoft.com/*',
+  'https://teams.live.com/*',
+];
+
+// Lets a developer point the extension at a local backend without editing
+// this file — chrome.storage.local.set({ apiBase: 'http://localhost:3000' }).
+let apiBaseOverride = null;
+async function getApiBase() {
+  if (apiBaseOverride !== null) return apiBaseOverride || CONFIG.API_BASE;
+  const { apiBase } = await chrome.storage.local.get('apiBase');
+  apiBaseOverride = apiBase || '';
+  return apiBaseOverride || CONFIG.API_BASE;
+}
 
 // Every platform the content script knows how to run on. Used both to
 // broadcast preference updates and (in the popup) to find a usable tab.
@@ -87,7 +106,8 @@ async function apiFetch(path, { method = 'POST', body, signal } = {}) {
     : controller.signal;
 
   try {
-    const res = await fetch(`${CONFIG.API_BASE}${path}`, {
+    const apiBase = await getApiBase();
+    const res = await fetch(`${apiBase}${path}`, {
       method,
       headers: {
         'Content-Type': 'application/json',
@@ -268,7 +288,7 @@ async function setPreferences(patch) {
 }
 
 async function broadcastToTabs(message) {
-  const tabs = await chrome.tabs.query({ url: ['http://*/*', 'https://*/*'] });
+  const tabs = await chrome.tabs.query({ url: SUPPORTED_HOST_PATTERNS });
   await Promise.allSettled(
     tabs.map((t) => t.id && chrome.tabs.sendMessage(t.id, message))
   );
