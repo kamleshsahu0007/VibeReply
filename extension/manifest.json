@@ -3,7 +3,7 @@
   "name": "VibeReply",
   "short_name": "VibeReply",
   "version": "1.0.0",
-  "description": "Contextual AI reply and rewrite assistant for WhatsApp Web and LinkedIn messaging. Reads only currently visible messages. No auto-send. No automation.",
+  "description": "Contextual AI reply and rewrite assistant for any messaging or compose box on the web. Reads only currently visible messages. No auto-send. No automation.",
   "minimum_chrome_version": "116",
 
   "action": {
@@ -31,17 +31,10 @@
 
   "content_scripts": [
     {
-      "matches": [
-        "https://web.whatsapp.com/*",
-        "https://www.linkedin.com/*",
-        "https://mail.google.com/*",
-        "https://app.slack.com/*",
-        "https://teams.microsoft.com/*",
-        "https://teams.live.com/*"
-      ],
+      "matches": ["http://*/*", "https://*/*"],
       "js": ["lib/languages.js", "lib/storage.js", "content.js"],
       "run_at": "document_idle",
-      "all_frames": false,
+      "all_frames": true,
       "world": "ISOLATED"
     }
   ],
@@ -53,13 +46,8 @@
   ],
 
   "host_permissions": [
-    "https://web.whatsapp.com/*",
-    "https://www.linkedin.com/*",
-    "https://mail.google.com/*",
-    "https://app.slack.com/*",
-    "https://teams.microsoft.com/*",
-    "https://teams.live.com/*",
-    "https://vibe-reply-seven.vercel.app/*"
+    "http://*/*",
+    "https://*/*"
   ],
 
   "content_security_policy": {
@@ -69,14 +57,7 @@
   "web_accessible_resources": [
     {
       "resources": ["styles.css"],
-      "matches": [
-        "https://web.whatsapp.com/*",
-        "https://www.linkedin.com/*",
-        "https://mail.google.com/*",
-        "https://app.slack.com/*",
-        "https://teams.microsoft.com/*",
-        "https://teams.live.com/*"
-      ]
+      "matches": ["http://*/*", "https://*/*"]
     }
   ]
 }

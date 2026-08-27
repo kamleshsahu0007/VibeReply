@@ -16,15 +16,6 @@ const CONFIG = {
   RATE_LIMIT: { capacity: 5, refillPerSec: 0.5 }, // 5 burst, ~1 every 2s
 };
 
-const SUPPORTED_HOST_PATTERNS = [
-  'https://web.whatsapp.com/*',
-  'https://www.linkedin.com/*',
-  'https://mail.google.com/*',
-  'https://app.slack.com/*',
-  'https://teams.microsoft.com/*',
-  'https://teams.live.com/*',
-];
-
 // Lets a developer point the extension at a local backend without editing
 // this file — chrome.storage.local.set({ apiBase: 'http://localhost:3000' }).
 let apiBaseOverride = null;
@@ -222,10 +213,48 @@ async function handleFeedback(payload) {
   }
 }
 
+// The content script runs on every open tab across the whole browser (by
+// design — this is meant to work like Grammarly, on any site), and each one
+// asks for the tone list on load. Without caching that means one backend
+// call per tab, not per user. The service worker is the one thing shared
+// across all of them, so a short-lived cache here turns "N tabs open" back
+// into "~1 backend call per TTL window" regardless of how many sites/tabs
+// are open. chrome.storage.session (not .local) so it clears with the
+// browser session rather than lingering indefinitely.
+const TONES_CACHE_TTL_MS = 5 * 60 * 1000;
+let tonesCacheMemo = null; // { data, fetchedAt } — fast path once the SW is warm
+
+async function getCachedTones() {
+  const now = Date.now();
+  if (tonesCacheMemo && now - tonesCacheMemo.fetchedAt < TONES_CACHE_TTL_MS) {
+    return tonesCacheMemo.data;
+  }
+  const { tonesCache } = await chrome.storage.session.get('tonesCache');
+  if (tonesCache && now - tonesCache.fetchedAt < TONES_CACHE_TTL_MS) {
+    tonesCacheMemo = tonesCache;
+    return tonesCache.data;
+  }
+  return null;
+}
+
+async function setCachedTones(data) {
+  tonesCacheMemo = { data, fetchedAt: Date.now() };
+  await chrome.storage.session.set({ tonesCache: tonesCacheMemo });
+}
+
+async function invalidateTonesCache() {
+  tonesCacheMemo = null;
+  await chrome.storage.session.remove('tonesCache');
+}
+
 async function handleListTones() {
+  const cached = await getCachedTones();
+  if (cached) return { ok: true, data: cached };
+
   try {
     const res = await apiFetch(CONFIG.ENDPOINTS.tones, { method: 'GET' });
     const data = await res.json();
+    if (data?.success) await setCachedTones(data);
     return { ok: true, data }; // data: { success, tones }
   } catch (err) {
     return { ok: false, error: err?.message || 'network_error' };
@@ -238,6 +267,7 @@ async function handleSaveTone(payload) {
     const res = await apiFetch(CONFIG.ENDPOINTS.tones, { method: 'POST', body: payload });
     const data = await res.json();
     if (!data?.success) return { ok: false, error: data?.error?.message || 'save_failed' };
+    await invalidateTonesCache();
     return { ok: true, data }; // data: { success, tone }
   } catch (err) {
     return { ok: false, error: err?.message || 'network_error' };
@@ -250,6 +280,7 @@ async function handleDeleteTone(payload) {
     await apiFetch(`${CONFIG.ENDPOINTS.tones}/${encodeURIComponent(payload?.key || '')}`, {
       method: 'DELETE',
     });
+    await invalidateTonesCache();
     return { ok: true };
   } catch (err) {
     return { ok: false, error: err?.message || 'network_error' };
@@ -288,7 +319,7 @@ async function setPreferences(patch) {
 }
 
 async function broadcastToTabs(message) {
-  const tabs = await chrome.tabs.query({ url: SUPPORTED_HOST_PATTERNS });
+  const tabs = await chrome.tabs.query({ url: ['http://*/*', 'https://*/*'] });
   await Promise.allSettled(
     tabs.map((t) => t.id && chrome.tabs.sendMessage(t.id, message))
   );
