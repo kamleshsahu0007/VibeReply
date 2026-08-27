@@ -303,12 +303,12 @@ export default function Playground() {
   }
 
   return (
-    <section className="card" style={{ gridColumn: "span 2", marginTop: "2rem" }}>
+    <section className="card" style={{ gridColumn: "span 2", marginTop: "1rem" }}>
       <h2 className="card-title">
         <svg
           viewBox="0 0 24 24"
-          width="24"
-          height="24"
+          width="20"
+          height="20"
           fill="none"
           stroke="var(--accent)"
           strokeWidth="2"
@@ -323,49 +323,31 @@ export default function Playground() {
       <div className="playground-layout">
         {/* Left Column: Input and Results */}
         <div className="sandbox-panel">
-          <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
             {/* Input Textarea */}
-            <div>
-              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "600", color: "var(--fg-muted)" }}>
-                Paste Incoming Message
+            <div className="form-group">
+              <label className="form-label" style={{ textTransform: "uppercase", letterSpacing: "0.05em", fontSize: "0.8rem", color: "var(--accent)" }}>
+                Incoming Message Buffer
               </label>
               <textarea
-                style={{
-                  width: "100%",
-                  height: "120px",
-                  background: "rgba(255, 255, 255, 0.04)",
-                  border: "1px solid var(--border)",
-                  borderRadius: "10px",
-                  padding: "1rem",
-                  color: "#fff",
-                  fontSize: "0.95rem",
-                  fontFamily: "inherit",
-                  resize: "vertical",
-                  outline: "none",
-                }}
-                placeholder="Type or paste the message you received here (e.g. 'Як твої справи?' or 'movie chalein kal?')..."
+                style={{ width: "100%" }}
+                className="form-textarea"
+                placeholder="Paste incoming message context here..."
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
+                rows={4}
               />
             </div>
 
             {/* Controls: Language Selection & Action Button */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1.5rem", flexWrap: "wrap" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <span style={{ fontSize: "0.95rem", color: "var(--fg-muted)" }}>My Native Language:</span>
+                <span style={{ fontSize: "0.85rem", color: "var(--fg-muted)", fontWeight: "600", textTransform: "uppercase", letterSpacing: "0.03em" }}>Language Matrix:</span>
                 <select
-                  style={{
-                    background: "rgba(255, 255, 255, 0.08)",
-                    color: "#fff",
-                    border: "1px solid var(--border)",
-                    borderRadius: "8px",
-                    padding: "0.5rem 1rem",
-                    outline: "none",
-                    cursor: "pointer",
-                    fontSize: "0.9rem",
-                  }}
+                  className="form-select"
                   value={userLanguage}
                   onChange={(e) => setUserLanguage(e.target.value)}
+                  style={{ padding: "0.5rem 0.75rem", fontSize: "0.85rem" }}
                 >
                   {LANGUAGES.map((lang) => (
                     <option key={lang.code} value={lang.code} style={{ background: "#0b0f19" }}>
@@ -380,12 +362,12 @@ export default function Playground() {
                 disabled={loading}
                 className="btn btn-primary"
                 style={{
-                  padding: "0.75rem 2rem",
-                  fontSize: "0.95rem",
+                  padding: "0.6rem 1.8rem",
+                  fontSize: "0.85rem",
                   display: "flex",
                   alignItems: "center",
-                  gap: "8px",
-                  minWidth: "180px",
+                  gap: "6px",
+                  minWidth: "160px",
                   justifyContent: "center",
                 }}
               >
@@ -393,19 +375,19 @@ export default function Playground() {
                   <>
                     <span
                       style={{
-                        width: "16px",
-                        height: "16px",
-                        border: "2px solid rgba(255, 255, 255, 0.2)",
-                        borderTopColor: "#fff",
+                        width: "12px",
+                        height: "12px",
+                        border: "2px solid rgba(0, 242, 254, 0.2)",
+                        borderTopColor: "var(--accent)",
                         borderRadius: "50%",
                         animation: "spin 0.8s linear infinite",
                         display: "inline-block",
                       }}
                     />
-                    Generating...
+                    Computing...
                   </>
                 ) : (
-                  "Generate Suggestions"
+                  "Execute Synthesis"
                 )}
               </button>
             </div>
@@ -417,17 +399,17 @@ export default function Playground() {
             {detectedLang && (
               <div
                 style={{
-                  background: "rgba(6, 182, 212, 0.08)",
-                  border: "1px solid rgba(6, 182, 212, 0.2)",
-                  borderRadius: "12px",
-                  padding: "1.25rem",
+                  background: "rgba(0, 242, 254, 0.04)",
+                  border: "1px solid rgba(0, 242, 254, 0.15)",
+                  borderRadius: "6px",
+                  padding: "1rem",
                   animation: "fadeIn 0.5s ease",
                 }}
               >
-                <div style={{ fontWeight: "700", color: "var(--accent-secondary)", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.5rem" }}>
+                <div style={{ fontWeight: "700", color: "var(--accent)", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.25rem" }}>
                   Detected Language: {detectedLang.name}
                 </div>
-                <div style={{ color: "#fff", fontSize: "1rem", fontStyle: "italic", lineHeight: "1.5" }}>
+                <div style={{ color: "#fff", fontSize: "0.95rem", fontStyle: "italic", lineHeight: "1.4" }}>
                   &ldquo;{incomingTranslation || "Translating incoming message..."}&rdquo;
                 </div>
               </div>
@@ -437,10 +419,10 @@ export default function Playground() {
             {replies && (
               <div
                 style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-                  gap: "1.5rem",
-                  animation: "fadeIn 0.6s ease",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "1rem",
+                  animation: "fadeIn 0.5s ease",
                 }}
               >
                 {tones.map((tone) => {
@@ -457,100 +439,63 @@ export default function Playground() {
                     <div
                       key={tone.key}
                       style={{
-                        background: "rgba(255, 255, 255, 0.03)",
-                        border: "1px solid var(--border)",
-                        borderRadius: "12px",
-                        padding: "1.25rem",
+                        background: "rgba(255, 255, 255, 0.01)",
+                        border: "1px solid rgba(255, 255, 255, 0.04)",
+                        borderLeft: `3px solid ${toneColor}`,
+                        borderRadius: "4px",
+                        padding: "1rem 1.25rem",
                         display: "flex",
                         flexDirection: "column",
-                        justifyContent: "space-between",
-                        gap: "1rem",
+                        gap: "0.75rem",
                         transition: "border-color 0.2s",
                       }}
-                      onMouseEnter={(e) => (e.currentTarget.style.borderColor = toneColor)}
-                      onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--border)")}
                     >
-                      <div>
-                        {/* Header */}
-                        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "0.75rem" }}>
-                          <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: toneColor }} />
-                          <span style={{ fontSize: "0.8rem", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--fg-muted)" }}>
-                            {tone.name}
-                          </span>
-                        </div>
-
-                        {/* Output Text */}
-                        <div style={{ fontSize: "1.05rem", color: "#fff", fontWeight: "500", lineHeight: "1.5", marginBottom: "0.5rem" }}>
-                          {copyText}
-                        </div>
-
-                        {/* Meaning in Native Language */}
-                        {meaningText && (
-                          <div
-                            style={{
-                              fontSize: "0.85rem",
-                              color: "var(--fg-muted)",
-                              borderTop: "1px dashed var(--border)",
-                              paddingTop: "0.5rem",
-                              marginTop: "0.5rem",
-                            }}
-                          >
-                            <span style={{ fontWeight: "600" }}>Meaning:</span> {meaningText}
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem" }}>
+                        <div style={{ flex: 1 }}>
+                          {/* Header */}
+                          <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "0.5rem" }}>
+                            <span style={{ fontSize: "0.75rem", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.05em", color: toneColor }}>
+                              {tone.name}
+                            </span>
                           </div>
-                        )}
-                      </div>
 
-                      {/* Copy Button */}
-                      <button
-                        onClick={() => handleCopy(copyText, tone.key)}
-                        className="btn btn-secondary"
-                        style={{
-                          width: "100%",
-                          padding: "0.5rem",
-                          fontSize: "0.85rem",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          gap: "6px",
-                          borderColor: copiedKey === tone.key ? "var(--success)" : "var(--border)",
-                          color: copiedKey === tone.key ? "var(--success)" : "#fff",
-                        }}
-                      >
-                        {copiedKey === tone.key ? (
-                          <>
-                            <svg
-                              viewBox="0 0 24 24"
-                              width="14"
-                              height="14"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="3"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
+                          {/* Output Text */}
+                          <div style={{ fontSize: "1rem", color: "#fff", fontWeight: "500", lineHeight: "1.4" }}>
+                            {copyText}
+                          </div>
+
+                          {/* Meaning in Native Language */}
+                          {meaningText && (
+                            <div
+                              style={{
+                                fontSize: "0.8rem",
+                                color: "var(--fg-muted)",
+                                borderTop: "1px dashed rgba(255, 255, 255, 0.05)",
+                                paddingTop: "0.4rem",
+                                marginTop: "0.4rem",
+                              }}
                             >
-                              <polyline points="20 6 9 17 4 12" />
-                            </svg>
-                            Copied!
-                          </>
-                        ) : (
-                          <>
-                            <svg
-                              viewBox="0 0 24 24"
-                              width="14"
-                              height="14"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                            </svg>
-                            Copy suggestion
-                          </>
-                        )}
-                      </button>
+                              <span style={{ fontWeight: "600" }}>Source Translation:</span> {meaningText}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Copy Button */}
+                        <button
+                          onClick={() => handleCopy(copyText, tone.key)}
+                          className="btn"
+                          style={{
+                            padding: "0.4rem 0.8rem",
+                            fontSize: "0.75rem",
+                            borderColor: copiedKey === tone.key ? "var(--success)" : "rgba(255, 255, 255, 0.08)",
+                            color: copiedKey === tone.key ? "var(--success)" : "#fff",
+                            background: "transparent",
+                            minWidth: "70px",
+                          }}
+                        >
+                          {copiedKey === tone.key ? "Copied" : "Copy"}
+                        </button>
+                      </div>
                     </div>
                   );
                 })}
@@ -562,39 +507,39 @@ export default function Playground() {
         {/* Right Column: Tone Profiles Management */}
         <div className="tones-panel">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
-            <h3 style={{ fontSize: "1.2rem", fontWeight: "600", color: "#fff" }}>Tone Profiles</h3>
+            <h3 style={{ fontSize: "1.1rem", fontWeight: "600", color: "#fff", textTransform: "uppercase", letterSpacing: "0.05em" }}>Tones Index</h3>
             {!isAdding && (
               <button
                 onClick={() => setIsAdding(true)}
                 className="btn btn-primary"
                 style={{
-                  padding: "0.4rem 0.8rem",
-                  fontSize: "0.8rem",
+                  padding: "0.3rem 0.75rem",
+                  fontSize: "0.75rem",
                   display: "flex",
                   alignItems: "center",
                   gap: "4px",
                 }}
               >
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="12" y1="5" x2="12" y2="19" />
                   <line x1="5" y1="12" x2="19" y2="12" />
                 </svg>
-                Add Custom
+                Insert custom
               </button>
             )}
           </div>
 
           {loadingTones ? (
-            <div style={{ color: "var(--fg-muted)", fontSize: "0.9rem", textAlign: "center", padding: "2rem" }}>
-              Loading tone profiles...
+            <div style={{ color: "var(--fg-muted)", fontSize: "0.85rem", textAlign: "center", padding: "2rem" }}>
+              Loading registers...
             </div>
           ) : (
             <>
               {/* Add Custom Tone Form */}
               {isAdding && (
                 <form onSubmit={handleAddTone} className="tone-form-container">
-                  <h4 style={{ fontSize: "0.95rem", fontWeight: "700", color: "#fff", borderBottom: "1px solid var(--border)", paddingBottom: "0.5rem", marginBottom: "0.5rem" }}>
-                    Create Custom Tone
+                  <h4 style={{ fontSize: "0.85rem", fontWeight: "700", color: "var(--accent)", borderBottom: "1px solid rgba(0, 242, 254, 0.15)", paddingBottom: "0.4rem", marginBottom: "0.25rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                    Configure registry
                   </h4>
 
                   {addingError && (
@@ -604,7 +549,7 @@ export default function Playground() {
                   )}
 
                   <div className="form-group">
-                    <label className="form-label">Name</label>
+                    <label className="form-label">Key Name</label>
                     <input
                       type="text"
                       className="form-input"
@@ -617,10 +562,10 @@ export default function Playground() {
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label">Description</label>
+                    <label className="form-label">Registry Description</label>
                     <textarea
                       className="form-textarea"
-                      placeholder="e.g. Biting humor, wit, and subtle irony..."
+                      placeholder="Specify how this tone should modify output streams..."
                       value={newToneDesc}
                       onChange={(e) => setNewToneDesc(e.target.value)}
                       rows={2}
@@ -632,11 +577,11 @@ export default function Playground() {
                   {/* Advanced Settings Accordion */}
                   <div>
                     <div className="advanced-header" onClick={() => setShowAdvanced(!showAdvanced)}>
-                      <span>{showAdvanced ? "Hide Advanced Settings" : "Show Advanced Settings"}</span>
+                      <span>{showAdvanced ? "Collapse Settings" : "Expand Tuning Metrics"}</span>
                       <svg
                         viewBox="0 0 24 24"
-                        width="16"
-                        height="16"
+                        width="14"
+                        height="14"
                         fill="none"
                         stroke="currentColor"
                         strokeWidth="2"
@@ -649,7 +594,7 @@ export default function Playground() {
                     </div>
 
                     {showAdvanced && (
-                      <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginTop: "0.5rem", borderTop: "1px dashed var(--border)", paddingTop: "0.75rem" }}>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginTop: "0.5rem", borderTop: "1px dashed rgba(255, 255, 255, 0.05)", paddingTop: "0.75rem" }}>
                         <div className="slider-group">
                           <div className="slider-header">
                             <span>Formality</span>
@@ -710,10 +655,10 @@ export default function Playground() {
                         </div>
 
                         <div className="form-group">
-                          <label className="form-label">Custom Instructions (Optional)</label>
+                          <label className="form-label">Custom Rules</label>
                           <textarea
                             className="form-textarea"
-                            placeholder="e.g. Speak with light self-deprecation..."
+                            placeholder="Add specific instructions for reply generation..."
                             value={customInstructions}
                             onChange={(e) => setCustomInstructions(e.target.value)}
                             rows={2}
@@ -729,9 +674,9 @@ export default function Playground() {
                       type="submit"
                       disabled={savingTone}
                       className="btn btn-primary"
-                      style={{ flex: 1, padding: "0.5rem", fontSize: "0.85rem" }}
+                      style={{ flex: 1, padding: "0.4rem", fontSize: "0.8rem" }}
                     >
-                      {savingTone ? "Saving..." : "Save Tone"}
+                      {savingTone ? "Writing..." : "Write Registry"}
                     </button>
                     <button
                       type="button"
@@ -740,7 +685,7 @@ export default function Playground() {
                         setAddingError("");
                       }}
                       className="btn btn-secondary"
-                      style={{ padding: "0.5rem 1rem", fontSize: "0.85rem" }}
+                      style={{ padding: "0.4rem 0.8rem", fontSize: "0.8rem" }}
                     >
                       Cancel
                     </button>
@@ -751,36 +696,36 @@ export default function Playground() {
               {/* Tones List */}
               <div className="tone-list">
                 {tones.length === 0 ? (
-                  <div style={{ color: "var(--fg-muted)", fontSize: "0.85rem", textAlign: "center", padding: "1.5rem" }}>
-                    No tones found.
+                  <div style={{ color: "var(--fg-muted)", fontSize: "0.8rem", textAlign: "center", padding: "1.5rem" }}>
+                    No registries configured.
                   </div>
                 ) : (
                   tones.map((tone) => {
                     const toneColor = getToneColor(tone.key);
                     return (
-                      <div key={tone.key} className="tone-item">
+                      <div key={tone.key} className="tone-item" style={{ padding: "0.6rem 0.85rem", gap: "8px" }}>
                         <div className="tone-info">
-                          <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: toneColor, marginTop: "6px" }} />
+                          <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: toneColor, marginTop: "6px" }} />
                           <div className="tone-meta">
                             <div className="tone-name-badge">
-                              <span className="tone-name-text">{tone.name}</span>
+                              <span className="tone-name-text" style={{ fontSize: "0.85rem" }}>{tone.name}</span>
                               {tone.isCustom ? (
-                                <span style={{ fontSize: "0.65rem", padding: "2px 6px", background: "rgba(6, 182, 212, 0.15)", color: "var(--accent-secondary)", borderRadius: "4px", fontWeight: "700", textTransform: "uppercase" }}>
+                                <span style={{ fontSize: "0.6rem", padding: "1px 4px", background: "rgba(0, 242, 254, 0.1)", color: "var(--accent)", borderRadius: "2px", fontWeight: "700" }}>
                                   Custom
                                 </span>
                               ) : (
-                                <span style={{ fontSize: "0.65rem", padding: "2px 6px", background: "rgba(255, 255, 255, 0.08)", color: "var(--fg-muted)", borderRadius: "4px", fontWeight: "700", textTransform: "uppercase" }}>
+                                <span style={{ fontSize: "0.6rem", padding: "1px 4px", background: "rgba(255, 255, 255, 0.05)", color: "var(--fg-muted)", borderRadius: "2px", fontWeight: "700" }}>
                                   Default
                                 </span>
                               )}
                             </div>
-                            <span className="tone-desc-text">{tone.description}</span>
+                            <span className="tone-desc-text" style={{ fontSize: "0.75rem", marginTop: "2px" }}>{tone.description}</span>
                           </div>
                         </div>
 
                         <div className="tone-actions">
                           {/* Active Toggle Switch */}
-                          <label className="switch" title={tone.isActive ? "Disable Tone" : "Enable Tone"}>
+                          <label className="switch" title={tone.isActive ? "Deactivate registry" : "Activate registry"}>
                             <input
                               type="checkbox"
                               checked={tone.isActive}
@@ -794,9 +739,9 @@ export default function Playground() {
                             <button
                               onClick={() => handleDeleteTone(tone.key)}
                               className="delete-btn"
-                              title="Delete custom tone"
+                              title="Purge custom registry"
                             >
-                              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <polyline points="3 6 5 6 21 6" />
                                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                                 <line x1="10" y1="11" x2="10" y2="17" />
@@ -824,76 +769,73 @@ export default function Playground() {
         .playground-layout {
           display: grid;
           grid-template-columns: 1.6fr 1.4fr;
-          gap: 2.5rem;
+          gap: 2rem;
           align-items: start;
         }
         @media (max-width: 900px) {
           .playground-layout {
             grid-template-columns: 1fr;
-            gap: 2rem;
+            gap: 1.5rem;
           }
         }
         .sandbox-panel {
           display: flex;
           flex-direction: column;
-          gap: 1.5rem;
+          gap: 1.25rem;
         }
         .tones-panel {
-          border-left: 1px solid var(--border);
-          padding-left: 2rem;
+          border-left: 1px solid rgba(255, 255, 255, 0.04);
+          padding-left: 1.5rem;
           display: flex;
           flex-direction: column;
-          gap: 1.5rem;
+          gap: 1.25rem;
         }
         @media (max-width: 900px) {
           .tones-panel {
             border-left: none;
             padding-left: 0;
-            border-top: 1px solid var(--border);
-            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            padding-top: 1.5rem;
           }
         }
         .tone-list {
           display: flex;
           flex-direction: column;
-          gap: 12px;
-          max-height: 450px;
+          gap: 10px;
+          max-height: 400px;
           overflow-y: auto;
-          padding-right: 0.5rem;
+          padding-right: 0.25rem;
         }
         .tone-list::-webkit-scrollbar {
-          width: 6px;
+          width: 4px;
         }
         .tone-list::-webkit-scrollbar-track {
-          background: rgba(255, 255, 255, 0.02);
-          border-radius: 3px;
+          background: rgba(255, 255, 255, 0.01);
         }
         .tone-list::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.1);
-          border-radius: 3px;
+          background: rgba(0, 242, 254, 0.1);
+          border-radius: 2px;
         }
         .tone-list::-webkit-scrollbar-thumb:hover {
-          background: rgba(255, 255, 255, 0.2);
+          background: rgba(0, 242, 254, 0.25);
         }
         .tone-item {
-          background: rgba(255, 255, 255, 0.02);
-          border: 1px solid var(--border);
-          border-radius: 10px;
-          padding: 0.75rem 1rem;
+          background: rgba(255, 255, 255, 0.01);
+          border: 1px solid rgba(255, 255, 255, 0.03);
+          border-radius: var(--radius-sm);
           display: flex;
           align-items: flex-start;
           justify-content: space-between;
-          gap: 12px;
           transition: var(--transition);
         }
         .tone-item:hover {
-          background: rgba(255, 255, 255, 0.04);
-          border-color: rgba(255, 255, 255, 0.15);
+          background: rgba(0, 242, 254, 0.01);
+          border-color: rgba(0, 242, 254, 0.15);
         }
         .tone-info {
           display: flex;
           align-items: flex-start;
-          gap: 10px;
+          gap: 8px;
           flex: 1;
         }
         .tone-meta {
@@ -903,62 +845,20 @@ export default function Playground() {
         .tone-name-badge {
           display: flex;
           align-items: center;
-          gap: 6px;
+          gap: 5px;
         }
         .tone-name-text {
           font-weight: 600;
           color: #fff;
-          font-size: 0.95rem;
         }
         .tone-desc-text {
-          font-size: 0.8rem;
           color: var(--fg-muted);
-          margin-top: 4px;
-          line-height: 1.4;
+          line-height: 1.35;
         }
         .tone-actions {
           display: flex;
           align-items: center;
-          gap: 10px;
-        }
-        .switch {
-          position: relative;
-          display: inline-block;
-          width: 34px;
-          height: 20px;
-        }
-        .switch input {
-          opacity: 0;
-          width: 0;
-          height: 0;
-        }
-        .slider {
-          position: absolute;
-          cursor: pointer;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background-color: rgba(255, 255, 255, 0.1);
-          transition: .3s;
-          border-radius: 20px;
-        }
-        .slider:before {
-          position: absolute;
-          content: "";
-          height: 14px;
-          width: 14px;
-          left: 3px;
-          bottom: 3px;
-          background-color: white;
-          transition: .3s;
-          border-radius: 50%;
-        }
-        input:checked + .slider {
-          background-color: var(--success);
-        }
-        input:checked + .slider:before {
-          transform: translateX(14px);
+          gap: 8px;
         }
         .delete-btn {
           background: transparent;
@@ -969,78 +869,58 @@ export default function Playground() {
           display: flex;
           align-items: center;
           justify-content: center;
-          border-radius: 4px;
+          border-radius: 3px;
           transition: var(--transition);
         }
         .delete-btn:hover {
           color: var(--danger);
-          background: rgba(244, 63, 94, 0.1);
+          background: rgba(244, 63, 94, 0.08);
         }
         .tone-form-container {
-          background: rgba(255, 255, 255, 0.02);
-          border: 1px solid var(--border);
-          border-radius: 12px;
-          padding: 1.25rem;
+          background: rgba(255, 255, 255, 0.01);
+          border: 1px solid rgba(0, 242, 254, 0.15);
+          border-radius: var(--radius-sm);
+          padding: 1rem;
           display: flex;
           flex-direction: column;
-          gap: 1rem;
-          animation: fadeIn 0.4s ease;
+          gap: 0.75rem;
+          animation: fadeIn 0.3s ease;
         }
         .form-group {
           display: flex;
           flex-direction: column;
-          gap: 6px;
+          gap: 4px;
         }
         .form-label {
-          font-size: 0.85rem;
+          font-size: 0.8rem;
           font-weight: 600;
           color: var(--fg-muted);
-        }
-        .form-input, .form-select, .form-textarea {
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid var(--border);
-          border-radius: 8px;
-          padding: 0.6rem 0.8rem;
-          color: #fff;
-          font-size: 0.9rem;
-          font-family: inherit;
-          outline: none;
-          transition: var(--transition);
-        }
-        .form-input:focus, .form-select:focus, .form-textarea:focus {
-          border-color: var(--accent);
-          background: rgba(255, 255, 255, 0.08);
         }
         .advanced-header {
           display: flex;
           align-items: center;
           justify-content: space-between;
           cursor: pointer;
-          padding: 0.5rem 0;
-          color: var(--accent-secondary);
-          font-size: 0.85rem;
+          padding: 0.4rem 0;
+          color: var(--accent);
+          font-size: 0.8rem;
           font-weight: 700;
           user-select: none;
+          font-family: 'Space Grotesk', sans-serif;
+          letter-spacing: 0.05em;
+          text-transform: uppercase;
         }
         .slider-group {
           display: flex;
           flex-direction: column;
-          gap: 4px;
-          margin-bottom: 0.75rem;
+          gap: 2px;
+          margin-bottom: 0.5rem;
         }
         .slider-header {
           display: flex;
           justify-content: space-between;
-          font-size: 0.8rem;
+          font-size: 0.75rem;
           color: var(--fg-muted);
-        }
-        .range-slider {
-          width: 100%;
-          accent-color: var(--accent);
-          background: rgba(255, 255, 255, 0.1);
-          height: 6px;
-          border-radius: 3px;
-          outline: none;
         }
       `}</style>
     </section>
