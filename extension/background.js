@@ -4,6 +4,8 @@
  * Stateless across SW restarts; durable state lives in chrome.storage.
  */
 
+import * as VRTrial from './lib/trial.js';
+
 const CONFIG = {
   // Override locally via chrome.storage.local.set({ apiBase: 'http://localhost:3000' })
   API_BASE: 'https://vibe-reply-seven.vercel.app',
@@ -14,6 +16,11 @@ const CONFIG = {
   },
   REQUEST_TIMEOUT_MS: 20_000,
   RATE_LIMIT: { capacity: 5, refillPerSec: 0.5 }, // 5 burst, ~1 every 2s
+
+  // Placeholder — replace with a real Stripe Payment Link (or a backend
+  // endpoint that creates a Checkout Session). There's no billing backend
+  // in this repo yet, so this is unwired until one exists.
+  STRIPE_CHECKOUT_URL: 'https://buy.stripe.com/REPLACE_ME',
 };
 
 // Lets a developer point the extension at a local backend without editing
@@ -43,6 +50,7 @@ const MSG = Object.freeze({
   SAVE_TONE: 'SAVE_TONE',
   DELETE_TONE: 'DELETE_TONE',
   CLEAR_ALL_CONVERSATIONS: 'CLEAR_ALL_CONVERSATIONS',
+  OPEN_CHECKOUT: 'OPEN_CHECKOUT',
   PING: 'PING',
 });
 
@@ -146,6 +154,11 @@ async function handleGenerate(payload) {
     return { ok: false, error: 'rate_limited', retryAfterMs: 2000 };
   }
 
+  const quota = await VRTrial.checkQuota();
+  if (!quota.allowed) {
+    return { ok: false, error: 'paywall', data: quota };
+  }
+
   const body = {
     task: payload?.task === 'rewrite' ? 'rewrite' : 'reply',
     messages: Array.isArray(payload?.messages) ? payload.messages : [],
@@ -162,6 +175,7 @@ async function handleGenerate(payload) {
     if (!data?.success) {
       return { ok: false, error: data?.error?.message || 'generation_failed' };
     }
+    await VRTrial.recordUsage('reply');
     return { ok: true, data }; // data: { success, replies, meta }
   } catch (err) {
     if (err instanceof ApiError && err.status === 401) {
@@ -181,6 +195,11 @@ async function handleTranslate(payload) {
     return { ok: false, error: 'rate_limited', retryAfterMs: 2000 };
   }
 
+  const quota = await VRTrial.checkQuota();
+  if (!quota.allowed) {
+    return { ok: false, error: 'paywall', data: quota };
+  }
+
   const body = {
     task: 'translate',
     text: payload.text,
@@ -194,6 +213,7 @@ async function handleTranslate(payload) {
     if (!data?.success) {
       return { ok: false, error: data?.error?.message || 'translation_failed' };
     }
+    await VRTrial.recordUsage('translation');
     return { ok: true, data }; // data: { success, translatedText, meta }
   } catch (err) {
     if (err instanceof ApiError && err.status === 401) {
@@ -334,6 +354,11 @@ async function handleClearAllConversations() {
   return { ok: true };
 }
 
+async function handleOpenCheckout() {
+  await chrome.tabs.create({ url: CONFIG.STRIPE_CHECKOUT_URL });
+  return { ok: true };
+}
+
 /* --------------------------- Message dispatcher ------------------------- */
 const ROUTES = {
   [MSG.GENERATE]: (p) => handleGenerate(p),
@@ -345,6 +370,7 @@ const ROUTES = {
   [MSG.SAVE_TONE]: (p) => handleSaveTone(p),
   [MSG.DELETE_TONE]: (p) => handleDeleteTone(p),
   [MSG.CLEAR_ALL_CONVERSATIONS]: () => handleClearAllConversations(),
+  [MSG.OPEN_CHECKOUT]: () => handleOpenCheckout(),
   [MSG.PING]: () => ({ ok: true, data: { pong: Date.now() } }),
 };
 
@@ -372,6 +398,7 @@ chrome.runtime.onInstalled.addListener(async ({ reason }) => {
   if (reason === 'install') {
     await chrome.storage.sync.set({ preferences: DEFAULT_PREFS });
     await getDeviceId(); // seed identity up-front
+    await VRTrial.ensureInstallState(); // starts the 7-day PRO trial clock
   }
 });
 

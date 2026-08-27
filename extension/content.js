@@ -23,6 +23,7 @@
     FEEDBACK: 'SUGGESTION_FEEDBACK',
     GET_PREFS: 'GET_PREFERENCES',
     LIST_TONES: 'LIST_TONES',
+    OPEN_CHECKOUT: 'OPEN_CHECKOUT',
   });
 
   const log = {
@@ -476,9 +477,17 @@
 
       this.floatingIcon = null;
       this.panel = null;
-      
+
+      // "New message" ambient nudge (see _startMessageWatch): tracks the
+      // most recent incoming message we've shown the user so a freshly
+      // arrived one can gently glow the icon without generating anything
+      // or touching the compose box — purely a passive notice.
+      this.messageWatchObserver = null;
+      this.messageWatchDebounced = null;
+      this.lastIncomingFingerprint = null;
+
       this.state = {
-        iconState: 'idle', // 'idle' | 'loading' | 'suggest' | 'error'
+        iconState: 'idle', // 'idle' | 'loading' | 'suggest' | 'error' | 'new'
         panelVisible: false,
         activeTab: 'rewrite', // 'reply' | 'rewrite' | 'translate'
         loading: false,
@@ -555,6 +564,7 @@
         <div class="vr-spinner"></div>
         <div class="vr-badge vr-badge-suggest"></div>
         <div class="vr-badge vr-badge-error"></div>
+        <div class="vr-badge vr-badge-new"></div>
       `;
       this.floatingIcon.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -590,7 +600,7 @@
 
       this.activeEditor = el;
       this.activeAdapter = getAdapterForHost();
-      
+
       // Monitor size changes on editor
       if (this.resizeObserver) {
         this.resizeObserver.disconnect();
@@ -601,13 +611,14 @@
       this.state.iconState = 'idle';
       this._updateFloatingIcon();
       this.reposition();
+      this._startMessageWatch();
     }
 
     _handleBlur(e) {
       setTimeout(() => {
         const nextFocused = document.activeElement;
         const root = nextFocused?.getRootNode();
-        
+
         // If focus shifted inside our Shadow DOM, do not close or hide
         if (nextFocused === this.host || root === this.shadow) {
           return;
@@ -623,8 +634,62 @@
             this.resizeObserver.disconnect();
             this.resizeObserver = null;
           }
+          this._stopMessageWatch();
         }
       }, 150);
+    }
+
+    // ---------------------------------------------------------------------
+    // "New message" glow — a purely passive, opt-in-by-focus nudge. No
+    // network call, no auto-generation: just notices that the visible
+    // conversation grew an incoming message since we last looked, and asks
+    // the floating icon to glow so the user knows to check back in.
+    // ---------------------------------------------------------------------
+    _startMessageWatch() {
+      this._stopMessageWatch();
+      if (!this.activeAdapter || typeof this.activeAdapter.getConversationContext !== 'function') return;
+
+      // Seed the baseline from what's already visible so mount doesn't
+      // itself look like "a new message just arrived".
+      this.lastIncomingFingerprint = this._latestIncomingFingerprint();
+
+      this.messageWatchDebounced = debounce(() => this._checkForNewIncoming(), 700);
+      this.messageWatchObserver = new MutationObserver(() => this.messageWatchDebounced());
+      this.messageWatchObserver.observe(document.body, { childList: true, subtree: true, characterData: true });
+    }
+
+    _stopMessageWatch() {
+      if (this.messageWatchObserver) {
+        this.messageWatchObserver.disconnect();
+        this.messageWatchObserver = null;
+      }
+      if (this.messageWatchDebounced) {
+        this.messageWatchDebounced.cancel();
+        this.messageWatchDebounced = null;
+      }
+      this.lastIncomingFingerprint = null;
+    }
+
+    _latestIncomingFingerprint() {
+      if (!this.activeAdapter) return null;
+      const box = this.activeAdapter.getComposeBox(this.activeEditor);
+      const messages = safe(() => this.activeAdapter.getConversationContext(box), []) || [];
+      for (let i = messages.length - 1; i >= 0; i--) {
+        if (messages[i].type === 'incoming') return messages[i].id || `${messages[i].sender}:${messages[i].text}`;
+      }
+      return null;
+    }
+
+    _checkForNewIncoming() {
+      if (!this.activeAdapter || this.state.panelVisible) return; // don't interrupt an open panel
+      const latest = this._latestIncomingFingerprint();
+      if (latest && latest !== this.lastIncomingFingerprint) {
+        this.lastIncomingFingerprint = latest;
+        if (this.state.iconState === 'idle') {
+          this.state.iconState = 'new';
+          this._updateFloatingIcon();
+        }
+      }
     }
 
     _repositionUI() {
@@ -689,8 +754,13 @@
       this.state.panelVisible = !this.state.panelVisible;
       if (this.state.panelVisible) {
         this.state.error = null;
+        this.state.paywall = null;
         this.state.replies = null;
         this.state.translatedText = null;
+        if (this.state.iconState === 'new') {
+          this.state.iconState = 'idle';
+          this._updateFloatingIcon();
+        }
         this._renderPanel();
         this.reposition();
         setTimeout(() => this.reposition(), 50); // double check height
@@ -733,6 +803,7 @@
           if (this.state.activeTab === selected) return;
           this.state.activeTab = selected;
           this.state.error = null;
+          this.state.paywall = null;
           this.state.replies = null;
           this.state.translatedText = null;
           this._renderPanel();
@@ -756,6 +827,11 @@
           </div>
           <div class="vr-status">${this.state.statusMessage || 'Loading...'}</div>
         `;
+        return;
+      }
+
+      if (this.state.paywall) {
+        this._renderPaywall(body, this.state.paywall);
         return;
       }
 
@@ -787,14 +863,22 @@
           msg = 'Generate context-aware suggestions in your tones.';
           btnText = 'Generate Suggestions';
         }
+        const canAct = draft || this.state.activeTab === 'reply';
+        const pillsHtml = canAct && this.tones.length
+          ? `<div class="vr-quick-pills">${this.tones.map((t) => `<button class="vr-pill" data-tone="${t.key}">${t.name}</button>`).join('')}</div>`
+          : '';
         body.innerHTML = `
           <div class="vr-empty">${msg}</div>
-          ${draft || this.state.activeTab === 'reply' ? `<button class="vr-btn vr-btn-primary vr-act-btn">${btnText}</button>` : ''}
+          ${pillsHtml}
+          ${canAct ? `<button class="vr-btn vr-btn-primary vr-act-btn">${btnText}</button>` : ''}
         `;
         const actBtn = body.querySelector('.vr-act-btn');
         if (actBtn) {
           actBtn.addEventListener('click', () => this._generate());
         }
+        body.querySelectorAll('.vr-pill').forEach((pill) => {
+          pill.addEventListener('click', () => this._quickInsert(pill.dataset.tone, pill));
+        });
         return;
       }
 
@@ -848,6 +932,33 @@
       body.appendChild(regenBtn);
     }
 
+    // Free-tier daily limit hit. `info` is the `checkQuota()` result from
+    // trial.js: { usedToday, limit, minutesSaved }. minutesSaved is derived
+    // from this device's own recorded usage over the last 7 days, not a
+    // fixed number shown to everyone regardless of actual use.
+    _renderPaywall(body, info) {
+      const statHtml = info.minutesSaved > 0
+        ? `<div class="vr-paywall-stat">You've saved ~${info.minutesSaved} min this week with AI-assisted replies.</div>`
+        : '';
+      body.innerHTML = `
+        <div class="vr-paywall">
+          <div class="vr-paywall-title">Daily free limit reached</div>
+          <div class="vr-paywall-body">You've used ${info.usedToday}/${info.limit} free AI replies today. Upgrade to PRO for unlimited replies and translations.</div>
+          ${statHtml}
+          <button class="vr-btn vr-btn-primary vr-paywall-upgrade">Upgrade to PRO</button>
+          <button class="vr-btn vr-btn-ghost vr-paywall-dismiss">Maybe later</button>
+        </div>
+      `;
+      body.querySelector('.vr-paywall-upgrade').addEventListener('click', () => {
+        send(MSG.OPEN_CHECKOUT, {});
+      });
+      body.querySelector('.vr-paywall-dismiss').addEventListener('click', () => {
+        this.state.paywall = null;
+        this._renderPanel();
+        this.reposition();
+      });
+    }
+
     _renderTranslateBody(body) {
       const box = this.activeAdapter ? this.activeAdapter.getComposeBox(this.activeEditor) : this.activeEditor;
       const draft = box ? (box.value || box.innerText || box.textContent || '').trim() : '';
@@ -891,9 +1002,81 @@
       }
     }
 
+    // One-click path: skip the "generate all tones, review cards, then
+    // insert" flow entirely — pick a tone pill, get that one tone back,
+    // insert it straight into the compose box. No extra clicks, no
+    // reload, focus stays wherever the page puts it after insertion.
+    async _quickInsert(toneKey, pillEl) {
+      if (pillEl) pillEl.setAttribute('aria-busy', 'true');
+      this.state.iconState = 'loading';
+      this._updateFloatingIcon();
+
+      const box = this.activeAdapter ? this.activeAdapter.getComposeBox(this.activeEditor) : this.activeEditor;
+      const draft = box ? (box.value || box.innerText || box.textContent || '').trim() : '';
+      let messages = [];
+      if (this.activeAdapter && typeof this.activeAdapter.getConversationContext === 'function') {
+        messages = this.activeAdapter.getConversationContext(box);
+      }
+
+      if (this.state.activeTab === 'reply' && messages.length === 0) {
+        if (pillEl) pillEl.setAttribute('aria-busy', 'false');
+        this.state.iconState = 'error';
+        this.state.error = 'No conversation context detected. Try highlighting incoming message text first.';
+        this._updateFloatingIcon();
+        this._renderPanel();
+        return;
+      }
+
+      const payload = {
+        task: this.state.activeTab,
+        userLanguage: this.state.userLanguage,
+        toneKeys: [toneKey],
+      };
+      const scrubbedMessages = messages.map((m) => ({ sender: m.sender, text: scrubPII(m.text), type: m.type }));
+      if (this.state.activeTab === 'rewrite') {
+        payload.draft = draft;
+        payload.messages = scrubbedMessages;
+      } else {
+        payload.messages = scrubbedMessages;
+      }
+
+      const res = await send(MSG.GENERATE, payload);
+      if (pillEl) pillEl.setAttribute('aria-busy', 'false');
+
+      if (!res.ok && res.error === 'paywall') {
+        this.state.iconState = 'error';
+        this.state.paywall = res.data;
+        this._updateFloatingIcon();
+        this._renderPanel();
+        return;
+      }
+      if (!res.ok) {
+        this.state.iconState = 'error';
+        this.state.error = res.error || 'Failed to generate a reply';
+        this._updateFloatingIcon();
+        this._renderPanel();
+        return;
+      }
+
+      const variant = res.data?.replies?.[toneKey];
+      const text = variant?.translated || variant?.text;
+      if (!text) {
+        this.state.iconState = 'error';
+        this.state.error = 'No reply received for that tone.';
+        this._updateFloatingIcon();
+        this._renderPanel();
+        return;
+      }
+
+      this.state.iconState = 'idle';
+      this._updateFloatingIcon();
+      this._insertText(text); // closes the panel on success, same as the card Insert/Use button
+    }
+
     async _generate() {
       this.state.loading = true;
       this.state.error = null;
+      this.state.paywall = null;
       this.state.replies = null;
       this.state.statusMessage = 'Reading context...';
       this.state.iconState = 'loading';
@@ -944,7 +1127,10 @@
       const res = await send(MSG.GENERATE, payload);
       this.state.loading = false;
 
-      if (!res.ok) {
+      if (!res.ok && res.error === 'paywall') {
+        this.state.paywall = res.data;
+        this.state.iconState = 'error';
+      } else if (!res.ok) {
         this.state.error = res.error || 'Failed to generate replies';
         this.state.iconState = 'error';
       } else {
@@ -965,6 +1151,7 @@
 
       this.state.loading = true;
       this.state.error = null;
+      this.state.paywall = null;
       this.state.translatedText = null;
       this.state.statusMessage = 'Translating...';
       this.state.iconState = 'loading';
@@ -977,7 +1164,10 @@
       });
       this.state.loading = false;
 
-      if (!res.ok) {
+      if (!res.ok && res.error === 'paywall') {
+        this.state.paywall = res.data;
+        this.state.iconState = 'error';
+      } else if (!res.ok) {
         this.state.error = res.error || 'Failed to translate';
         this.state.iconState = 'error';
       } else {
@@ -1076,7 +1266,18 @@
       70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
       100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
     }
-    
+
+    /* "New message" nudge — a soft ambient glow around the whole icon
+       rather than a corner dot, since this is meant to be noticed at a
+       glance without demanding attention like an error/alert would. */
+    #vr-floating-icon[data-state="new"] {
+      animation: vr-glow 2.4s ease-in-out infinite;
+    }
+    @keyframes vr-glow {
+      0%, 100% { box-shadow: 0 8px 24px rgba(0,0,0,0.35), 0 0 0 0 rgba(139, 92, 246, 0.45); }
+      50% { box-shadow: 0 8px 24px rgba(0,0,0,0.35), 0 0 14px 4px rgba(139, 92, 246, 0.55); }
+    }
+
     .vr-spinner {
       display: none;
       width: 16px;
@@ -1296,7 +1497,69 @@
       padding: 16px 8px;
       line-height: 1.4;
     }
-    
+
+    .vr-paywall {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 4px 2px 2px;
+      text-align: center;
+    }
+    .vr-paywall-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #e6edf3;
+    }
+    .vr-paywall-body {
+      font-size: 12px;
+      line-height: 1.5;
+      color: #8b949e;
+    }
+    .vr-paywall-stat {
+      font-size: 11.5px;
+      color: #a78bfa;
+      background: rgba(139, 92, 246, 0.12);
+      border-radius: 8px;
+      padding: 6px 8px;
+      line-height: 1.4;
+    }
+    .vr-paywall-upgrade {
+      margin-top: 4px;
+    }
+
+    /* One-click tone pills — pick a tone, get it inserted, done. No
+       intermediate "review the cards" step. */
+    .vr-quick-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+      padding: 0 4px 4px;
+    }
+    .vr-pill {
+      all: unset;
+      cursor: pointer;
+      padding: 5px 11px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #c9d1d9;
+      background: rgba(139, 92, 246, 0.12);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    }
+    .vr-pill:hover {
+      background: rgba(139, 92, 246, 0.22);
+      border-color: rgba(139, 92, 246, 0.55);
+    }
+    .vr-pill:active {
+      transform: scale(0.96);
+    }
+    .vr-pill[aria-busy="true"] {
+      opacity: 0.55;
+      pointer-events: none;
+    }
+
     .vr-skeleton-list {
       display: flex;
       flex-direction: column;
