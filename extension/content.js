@@ -381,6 +381,124 @@
     };
   }
 
+  // ---------------------------------------------------------------------------
+  // Generic on-screen message reading (no site-specific selectors)
+  //
+  // For the five named platforms above, getConversationContext knows the
+  // real DOM structure. For every other website there's no such knowledge,
+  // so this is a best-effort heuristic: find a chat-shaped region near the
+  // compose box, pull short text blocks out of it in on-screen order, and
+  // guess incoming/outgoing from left/right alignment (the near-universal
+  // convention for "my messages vs their messages" in chat UIs). It won't
+  // be perfect on every layout, but it means the extension reads *something*
+  // reasonable instead of nothing on sites it has never seen before.
+  // ---------------------------------------------------------------------------
+  const GENERIC_SCAN = Object.freeze({
+    MAX_NODES_SCANNED: 1500,
+    MIN_TEXT_LEN: 2,
+    MAX_TEXT_LEN: 400,
+    SKIP_TAGS: new Set(['script', 'style', 'svg', 'button', 'input', 'textarea', 'select', 'nav', 'header', 'footer', 'option', 'label']),
+  });
+
+  function isElementVisible(el) {
+    if (!(el instanceof HTMLElement)) return false;
+    const rect = el.getBoundingClientRect();
+    if (rect.width < 4 || rect.height < 4) return false;
+    const style = getComputedStyle(el);
+    if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return false;
+    return true;
+  }
+
+  // A candidate "message" element: has its own short-ish text, isn't a
+  // structural/interactive element, and has no child that itself carries
+  // meaningful text (so we pick the innermost text-bearing block rather than
+  // also counting its ancestor wrapper as a second "message").
+  function isLeafMessageCandidate(el) {
+    const tag = el.tagName.toLowerCase();
+    if (GENERIC_SCAN.SKIP_TAGS.has(tag)) return false;
+    if (el.isContentEditable) return false;
+    if (el.closest('nav, header, footer, [role="navigation"], [contenteditable="true"]')) return false;
+
+    const text = (el.innerText || '').trim();
+    if (text.length < GENERIC_SCAN.MIN_TEXT_LEN || text.length > GENERIC_SCAN.MAX_TEXT_LEN) return false;
+
+    for (const child of el.children) {
+      if ((child.innerText || '').trim().length >= GENERIC_SCAN.MIN_TEXT_LEN) return false;
+    }
+    return true;
+  }
+
+  // Walk up from the compose box looking for a scrollable ancestor (the
+  // classic sign of a message list) within a bounded number of hops. Falls
+  // back to a moderately-sized wrapping section so a miss doesn't fall all
+  // the way back to `document.body` (too broad: picks up nav/footer noise
+  // and is expensive to scan on a large page).
+  function findChatLikeContainer(fromEl) {
+    let node = fromEl;
+    let fallback = null;
+    for (let hops = 0; hops < 10 && node && node !== document.body; hops++) {
+      node = node.parentElement;
+      if (!node) break;
+      const style = getComputedStyle(node);
+      const scrollable = /(auto|scroll)/.test(style.overflowY) && node.scrollHeight > node.clientHeight + 20;
+      if (scrollable) return node;
+      const rect = node.getBoundingClientRect();
+      if (!fallback && rect.height >= 150 && rect.height <= window.innerHeight * 0.95) {
+        fallback = node;
+      }
+    }
+    return fallback || fromEl.closest('body') || document.body;
+  }
+
+  function scanForGenericMessages(container, composeBox) {
+    const candidates = [];
+    const walker = document.createTreeWalker(container, NodeFilter.SHOW_ELEMENT);
+    let node = walker.nextNode();
+    let scanned = 0;
+    while (node && scanned < GENERIC_SCAN.MAX_NODES_SCANNED) {
+      scanned++;
+      if (
+        node !== composeBox &&
+        (!composeBox || !node.contains(composeBox)) &&
+        isElementVisible(node) &&
+        isLeafMessageCandidate(node)
+      ) {
+        candidates.push(node);
+      }
+      node = walker.nextNode();
+    }
+
+    // Merge adjacent siblings sitting on ~the same line (e.g. a name span +
+    // a text span inside one message row) into a single message instead of
+    // reporting them as two.
+    const containerRect = container.getBoundingClientRect();
+    const merged = [];
+    for (const el of candidates) {
+      const rect = el.getBoundingClientRect();
+      const prev = merged[merged.length - 1];
+      if (
+        prev &&
+        el.parentElement === prev.lastEl.parentElement &&
+        Math.abs(rect.top - prev.rect.top) < 4
+      ) {
+        prev.text += ' ' + (el.innerText || '').trim();
+        prev.lastEl = el;
+        prev.rect = rect;
+      } else {
+        merged.push({ text: (el.innerText || '').trim(), rect, lastEl: el, centerX: rect.left + rect.width / 2 });
+      }
+    }
+
+    const limit = CONFIG.MAX_CONTEXT_MESSAGES;
+    return merged.slice(-limit).map((m, i) => ({
+      id: `generic:${i}:${m.rect.top}`,
+      sender: m.centerX > containerRect.left + containerRect.width / 2 ? 'You' : 'Partner',
+      text: m.text,
+      type: m.centerX > containerRect.left + containerRect.width / 2 ? 'outgoing' : 'incoming',
+      timestamp: Date.now(),
+    }));
+  }
+
   function createUniversalAdapter() {
     return {
       id: 'universal',
@@ -391,6 +509,8 @@
         return defaultInsertText(box, text, { replace });
       },
       getConversationContext(box) {
+        // Explicit selection is the strongest signal — if the user
+        // highlighted text themselves, trust that over the heuristic scan.
         const selection = window.getSelection().toString().trim();
         if (selection) {
           return [
@@ -402,6 +522,12 @@
               timestamp: Date.now()
             }
           ];
+        }
+
+        if (box) {
+          const container = findChatLikeContainer(box);
+          const found = safe(() => scanForGenericMessages(container, box), []);
+          if (found && found.length) return found;
         }
         return [];
       }
