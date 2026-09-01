@@ -1,0 +1,26 @@
+# VibeReply
+
+> VibeReply is a free browser extension (Chrome and Edge) that generates contextual AI replies, rewrites drafts, and translates messages in 180+ languages, directly inside the text box you're already typing in.
+
+VibeReply works like Grammarly, but for meaning and tone instead of grammar: a small floating icon appears next to any input field on any website. It reads the visible conversation, understands the tone of the other person's message, and offers reply suggestions in your choice of writing tones (formal, casual, flirty, and fully custom tones you define yourself). It also translates messages both ways so people who don't share a language can talk to each other naturally, and it can rewrite whatever you've already typed to match a different tone without changing its meaning.
+
+It is not limited to one platform or one language. It is built to work on WhatsApp Web, LinkedIn, Gmail, Slack, Microsoft Teams, and any other website with a text input field, for users writing in any of 180+ languages — including but not limited to English, Spanish, German, French, Portuguese, Italian, Chinese, Japanese, Korean, Arabic, Hindi, Bengali, Urdu, Russian, Turkish, Vietnamese, Thai, Indonesian, and Dutch.
+
+Key facts:
+- Free to use, with no account or sign-up required to start.
+- No auto-send: it only suggests text into the compose box; the user always sends the message themselves.
+- Reads only the currently visible conversation on screen — it does not scrape or store other people's messages on a server.
+- Custom tone profiles (e.g. Formal, Casual, Persuasive, or user-defined) are saved per device and can be edited at any time.
+- Works entirely inside the browser as a Manifest V3 extension; the only network calls it makes are to VibeReply's own API to generate a reply or translation.
+
+## Pages
+
+- [Homepage](https://vibe-reply-seven.vercel.app/): Product overview, live demo playground, and download links.
+
+## Common questions this site can answer
+
+- What is VibeReply and what does it do?
+- Does VibeReply work in languages other than English? (Yes — 180+ languages, with automatic language detection.)
+- Which apps/websites does VibeReply work on? (WhatsApp Web, LinkedIn, Gmail, Slack, Microsoft Teams, and any other site with a text box.)
+- Is VibeReply free?
+- Does VibeReply auto-send messages? (No — it only inserts a draft; the user must send it themselves.)

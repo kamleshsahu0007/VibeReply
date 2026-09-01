@@ -3,25 +3,25 @@ import type { ReactNode } from "react";
 import "@/app/globals.css";
 
 export const metadata: Metadata = {
-  title: "VibeReply — Contextual AI Reply & Rewrite Browser Companion",
-  description: "Boost your communication with VibeReply. A local, privacy-first browser extension that contextually generates replies and rewrites text directly inside WhatsApp Web, LinkedIn, and any online input field in customizable tone profiles.",
-  keywords: ["AI reply assistant", "contextual replies", "rewrite text tool", "whatsapp web assistant", "linkedin AI replies", "browser extension", "custom writing tones", "privacy first AI"],
+  title: "VibeReply — AI Reply & Translate Assistant for Any Language, Any Chat App",
+  description: "VibeReply generates contextual AI replies and translates messages in 180+ languages, directly inside WhatsApp Web, LinkedIn, Gmail, Slack, Teams, and any text box on the web. Works for English, Spanish, German, Chinese, Hindi, Arabic, and every major world language.",
+  keywords: ["AI reply assistant", "multilingual chat assistant", "AI translation extension", "whatsapp web assistant", "linkedin AI replies", "browser extension", "custom writing tones", "privacy first AI", "AI reply generator for any language"],
   authors: [{ name: "VibeReply Team" }],
   openGraph: {
-    title: "VibeReply — Contextual AI Reply & Rewrite Browser Companion",
-    description: "A privacy-first AI companion running contextually inside WhatsApp Web, LinkedIn, and anywhere you type on the web. Generate context-aware replies matching your personal tone profiles.",
-    url: "https://vibereply.com",
+    title: "VibeReply — AI Reply & Translate Assistant for Any Language, Any Chat App",
+    description: "Generate context-aware replies and translate messages in 180+ languages, right inside WhatsApp Web, LinkedIn, Gmail, Slack, Teams, and any input field on the web.",
+    url: "https://vibe-reply-seven.vercel.app",
     siteName: "VibeReply",
     locale: "en_US",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "VibeReply — Contextual AI Reply & Rewrite Browser Companion",
-    description: "Generate replies contextually inside WhatsApp Web and LinkedIn matching your custom writing tone profiles.",
+    title: "VibeReply — AI Reply & Translate Assistant for Any Language, Any Chat App",
+    description: "Generate and translate replies in 180+ languages, directly inside WhatsApp Web, LinkedIn, and anywhere you type.",
   },
   alternates: {
-    canonical: "https://vibereply.com",
+    canonical: "https://vibe-reply-seven.vercel.app",
   }
 };
 
@@ -30,14 +30,14 @@ const jsonLd = {
   "@graph": [
     {
       "@type": "WebSite",
-      "@id": "https://vibereply.com/#website",
-      "url": "https://vibereply.com",
+      "@id": "https://vibe-reply-seven.vercel.app/#website",
+      "url": "https://vibe-reply-seven.vercel.app",
       "name": "VibeReply",
-      "description": "Contextual AI Reply & Rewrite Browser Companion"
+      "description": "Contextual AI reply and translation companion supporting 180+ languages"
     },
     {
       "@type": "SoftwareApplication",
-      "@id": "https://vibereply.com/#software",
+      "@id": "https://vibe-reply-seven.vercel.app/#software",
       "name": "VibeReply",
       "operatingSystem": "Windows, macOS, Linux, ChromeOS",
       "applicationCategory": "BrowserApplication, CommunicationApplication",
@@ -47,23 +47,22 @@ const jsonLd = {
         "price": "0.00",
         "priceCurrency": "USD"
       },
-      "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": "4.9",
-        "ratingCount": "128"
-      },
       "featureList": [
         "Contextual message suggestions",
         "Customizable writing tone profiles",
-        "WhatsApp Web and LinkedIn integration",
-        "Local SQLite database cache",
-        "OpenAI and Gemini API support",
-        "Language translations"
+        "WhatsApp Web, LinkedIn, Gmail, Slack, and Teams integration",
+        "Works inside any text input field on the web",
+        "Cloud-synced custom tone profiles across devices",
+        "Real-time translation and reply generation in 180+ languages"
+      ],
+      "availableLanguage": [
+        "en", "es", "de", "fr", "pt", "it", "zh", "ja", "ko", "ru",
+        "ar", "hi", "bn", "ur", "tr", "vi", "th", "id", "nl", "pl"
       ]
     },
     {
       "@type": "FAQPage",
-      "@id": "https://vibereply.com/#faq",
+      "@id": "https://vibe-reply-seven.vercel.app/#faq",
       "mainEntity": [
         {
           "@type": "Question",
@@ -87,6 +86,14 @@ const jsonLd = {
           "acceptedAnswer": {
             "@type": "Answer",
             "text": "You can add or update custom tone profiles directly from the extension panel or homepage dashboard by adjusting sliders for Formality, Warmth, Conciseness, and Directness."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does VibeReply work in languages other than English?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. VibeReply supports over 180 languages, including Spanish, German, French, Chinese, Japanese, Arabic, Hindi, Portuguese, Russian, and Korean. It can detect the other person's language automatically, generate your reply in your own language, and translate it for them — or you can pick both languages manually."
           }
         }
       ]
