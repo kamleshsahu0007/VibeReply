@@ -329,14 +329,25 @@ export default function Playground() {
               <label className="form-label" style={{ textTransform: "uppercase", letterSpacing: "0.05em", fontSize: "0.8rem", color: "var(--accent)" }}>
                 Incoming Message Buffer
               </label>
-              <textarea
-                style={{ width: "100%" }}
-                className="form-textarea"
-                placeholder="Paste incoming message context here..."
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                rows={4}
-              />
+              <div style={{ position: "relative" }}>
+                <textarea
+                  style={{ width: "100%" }}
+                  className="form-textarea"
+                  placeholder="Paste incoming message context here..."
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  rows={4}
+                />
+                {/* Demo of the real floating icon the browser extension shows
+                    next to any text box, once installed — same design as
+                    extension/content.js's #vr-floating-icon, so this preview
+                    matches what visitors actually get. */}
+                <div className="floating-icon-demo" title="This is what the VibeReply icon looks like once you install the extension — it appears next to any text box you type in.">
+                  <svg viewBox="0 0 24 24" width="16" height="16">
+                    <path d="M4 6l8 12 8-12" fill="none" stroke="#8b5cf6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+              </div>
             </div>
 
             {/* Controls: Language Selection & Action Button */}
@@ -765,6 +776,31 @@ export default function Playground() {
           to {
             transform: rotate(360deg);
           }
+        }
+        @keyframes floatingIconGlow {
+          0%, 100% { box-shadow: 0 8px 24px rgba(0,0,0,0.35), 0 0 0 0 rgba(139, 92, 246, 0.45); }
+          50% { box-shadow: 0 8px 24px rgba(0,0,0,0.35), 0 0 14px 4px rgba(139, 92, 246, 0.55); }
+        }
+        .floating-icon-demo {
+          position: absolute;
+          bottom: 10px;
+          right: 10px;
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          background: rgba(22, 27, 34, 0.85);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: default;
+          backdrop-filter: blur(8px);
+          animation: floatingIconGlow 2.4s ease-in-out infinite;
+          transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .floating-icon-demo:hover {
+          transform: scale(1.1);
+          border-color: #8b5cf6;
         }
         .playground-layout {
           display: grid;
