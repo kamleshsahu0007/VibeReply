@@ -42,8 +42,11 @@ class InMemorySlidingWindowLimiter implements RateLimiter {
     const fresh = bucket.timestamps.filter((t) => t > cutoff);
 
     if (fresh.length >= this.limit) {
-      const oldest = fresh[0];
-      const retryAfterMs = Math.max(0, oldest + this.windowMs - now);
+      // fresh[0] is only undefined if `limit` is non-positive (a misconfigured
+      // env var, e.g. an empty string parsed to 0) — fall back to the full
+      // window rather than propagating NaN into the Retry-After header.
+      const oldest = fresh[0] ?? now;
+      const retryAfterMs = Math.max(0, oldest + this.windowMs - now) || this.windowMs;
       this.buckets.set(key, { timestamps: fresh });
       return {
         allowed: false,
@@ -80,8 +83,19 @@ class InMemorySlidingWindowLimiter implements RateLimiter {
   }
 }
 
-const limit = Number(process.env.RATE_LIMIT_REQUESTS ?? 20);
-const windowMs = Number(process.env.RATE_LIMIT_WINDOW_MS ?? 60_000);
+// `??` only falls back on null/undefined, not on an empty string — a env var
+// set to "" (present but blank, easy to do by accident in a dashboard) would
+// silently become `Number("") === 0`, rate-limiting every single request for
+// every visitor. Guard against that (and any other non-positive/garbage
+// value) by falling back to the default whenever parsing doesn't yield a
+// usable positive number.
+function parsePositiveInt(raw: string | undefined, fallback: number): number {
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+const limit = parsePositiveInt(process.env.RATE_LIMIT_REQUESTS, 20);
+const windowMs = parsePositiveInt(process.env.RATE_LIMIT_WINDOW_MS, 60_000);
 
 export const defaultRateLimiter: RateLimiter = new InMemorySlidingWindowLimiter(
   limit,
