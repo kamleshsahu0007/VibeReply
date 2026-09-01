@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { getOpenAIClient, OPENAI_MODEL } from "@/lib/openai/client";
+import { getOpenAIClient, OPENAI_MODEL_CHAIN } from "@/lib/openai/client";
 import { logger } from "@/lib/logger";
 import { InvalidModelOutputError, UpstreamError, UpstreamTimeoutError } from "@/lib/errors";
 import {
@@ -170,37 +170,68 @@ export interface GenerateRepliesOptions {
   signal?: AbortSignal;
 }
 
+// Tries each model in OPENAI_MODEL_CHAIN in order, falling through to the
+// next on failure (rate-limited, deprecated, temporarily down, etc.) instead
+// of failing the whole request over one model's outage. With no fallbacks
+// configured, this is just a single attempt on the primary model — same
+// behavior as before.
 async function callOpenAI(
-  params: OpenAI.Chat.Completions.ChatCompletionCreateParamsNonStreaming,
+  params: Omit<OpenAI.Chat.Completions.ChatCompletionCreateParamsNonStreaming, "model">,
   signal: AbortSignal | undefined,
   startedAt: number
 ): Promise<OpenAI.Chat.Completions.ChatCompletion> {
   const client = getOpenAIClient();
-  try {
-    return await client.chat.completions.create(params, { signal });
-  } catch (err) {
-    const elapsed = Date.now() - startedAt;
-    if (err instanceof OpenAI.APIConnectionTimeoutError) {
-      logger.error("openai.timeout", { elapsed });
-      throw new UpstreamTimeoutError();
-    }
-    if (err instanceof OpenAI.APIError) {
-      logger.error("openai.api_error", {
-        elapsed,
-        status: err.status,
-        type: err.type,
-        message: err.message,
+  let lastErr: unknown;
+
+  for (let i = 0; i < OPENAI_MODEL_CHAIN.length; i++) {
+    const model = OPENAI_MODEL_CHAIN[i];
+    const isLastModel = i === OPENAI_MODEL_CHAIN.length - 1;
+    try {
+      return await client.chat.completions.create({ ...params, model }, { signal });
+    } catch (err) {
+      lastErr = err;
+      const elapsed = Date.now() - startedAt;
+
+      if (signal?.aborted) break; // client disconnected — no point trying more models
+
+      if (!isLastModel) {
+        logger.warn("openai.model_failed_trying_next", {
+          model,
+          nextModel: OPENAI_MODEL_CHAIN[i + 1],
+          elapsed,
+          message: (err as Error).message,
+        });
+        continue;
+      }
+
+      if (err instanceof OpenAI.APIConnectionTimeoutError) {
+        logger.error("openai.timeout", { model, elapsed });
+        throw new UpstreamTimeoutError();
+      }
+      if (err instanceof OpenAI.APIError) {
+        logger.error("openai.api_error", {
+          model,
+          elapsed,
+          status: err.status,
+          type: err.type,
+          message: err.message,
+        });
+        throw new UpstreamError(`OpenAI API error: ${err.message}`, {
+          status: err.status,
+          type: err.type,
+        });
+      }
+      logger.error("openai.unknown_error", { model, elapsed, message: (err as Error).message });
+      throw new UpstreamError("Unexpected error talking to OpenAI", {
+        message: (err as Error).message,
       });
-      throw new UpstreamError(`OpenAI API error: ${err.message}`, {
-        status: err.status,
-        type: err.type,
-      });
     }
-    logger.error("openai.unknown_error", { elapsed, message: (err as Error).message });
-    throw new UpstreamError("Unexpected error talking to OpenAI", {
-      message: (err as Error).message,
-    });
   }
+
+  // Unreachable unless OPENAI_MODEL_CHAIN is empty, which it never is
+  // (OPENAI_MODEL always seeds it) — but keep TypeScript and a client
+  // abort mid-loop happy rather than falling off the end silently.
+  throw lastErr instanceof Error ? lastErr : new UpstreamError("No model available");
 }
 
 export async function generateReplies(
@@ -213,7 +244,6 @@ export async function generateReplies(
   const startedAt = Date.now();
   const completion = await callOpenAI(
     {
-      model: OPENAI_MODEL,
       temperature: input.task === "rewrite" ? 0.6 : 0.9,
       top_p: 0.95,
       max_tokens: Math.max(800, 450 * input.tones.length + 300),
@@ -243,7 +273,7 @@ export async function generateReplies(
   const latencyMs = Date.now() - startedAt;
 
   logger.info("openai.completion", {
-    model: OPENAI_MODEL,
+    model: completion.model,
     elapsed: latencyMs,
     task: input.task,
     promptTokens: completion.usage?.prompt_tokens,
@@ -254,7 +284,7 @@ export async function generateReplies(
   return {
     replies,
     meta: {
-      model: completion.model ?? OPENAI_MODEL,
+      model: completion.model || OPENAI_MODEL_CHAIN[0],
       latencyMs,
       task: input.task,
       detectedPartnerTone,
@@ -283,7 +313,6 @@ export async function translateText(
   const startedAt = Date.now();
   const completion = await callOpenAI(
     {
-      model: OPENAI_MODEL,
       temperature: 0.3,
       top_p: 0.95,
       max_tokens: 800,
@@ -327,7 +356,7 @@ export async function translateText(
 
   const latencyMs = Date.now() - startedAt;
   logger.info("openai.translate_completion", {
-    model: OPENAI_MODEL,
+    model: completion.model,
     elapsed: latencyMs,
     promptTokens: completion.usage?.prompt_tokens,
     completionTokens: completion.usage?.completion_tokens,
@@ -337,7 +366,7 @@ export async function translateText(
   return {
     translatedText,
     meta: {
-      model: completion.model ?? OPENAI_MODEL,
+      model: completion.model || OPENAI_MODEL_CHAIN[0],
       latencyMs,
       task: "translate",
       sourceLanguage: input.sourceLanguage,

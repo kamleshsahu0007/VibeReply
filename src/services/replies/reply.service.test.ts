@@ -7,6 +7,7 @@ const createMock = vi.fn();
 vi.mock("@/lib/openai/client", () => ({
   getOpenAIClient: () => ({ chat: { completions: { create: createMock } } }),
   OPENAI_MODEL: "gpt-4.1-mini",
+  OPENAI_MODEL_CHAIN: ["gpt-4.1-mini"],
 }));
 
 // Imported after the mock so the module under test picks up the mocked client.
@@ -248,6 +249,43 @@ describe("generateReplies", () => {
         partnerLanguage: "en",
       })
     ).rejects.toThrow(UpstreamError);
+  });
+
+  it("falls through to the next model in OPENAI_MODEL_CHAIN when the first one fails", async () => {
+    vi.resetModules();
+    const localCreateMock = vi.fn();
+    vi.doMock("@/lib/openai/client", () => ({
+      getOpenAIClient: () => ({ chat: { completions: { create: localCreateMock } } }),
+      OPENAI_MODEL: "gpt-4.1-mini",
+      OPENAI_MODEL_CHAIN: ["gpt-4.1-mini", "gpt-4o-mini"],
+    }));
+
+    localCreateMock
+      .mockRejectedValueOnce(new OpenAI.APIError(500, { message: "primary model down" }, "down", {}))
+      .mockResolvedValueOnce(
+        completion(
+          { mature: { text: "ok" }, casual: { text: "ok" }, detectedPartnerTone: "neutral" },
+          "gpt-4o-mini"
+        )
+      );
+
+    const { generateReplies: generateRepliesIsolated } = await import("./reply.service");
+
+    const result = await generateRepliesIsolated({
+      task: "reply",
+      messages: [{ sender: "Them", text: "hey", type: "incoming" }],
+      tones: TONES,
+      userLanguage: "en",
+      partnerLanguage: "en",
+    });
+
+    expect(localCreateMock).toHaveBeenCalledTimes(2);
+    expect(localCreateMock.mock.calls[0][0].model).toBe("gpt-4.1-mini");
+    expect(localCreateMock.mock.calls[1][0].model).toBe("gpt-4o-mini");
+    expect(result.meta.model).toBe("gpt-4o-mini");
+
+    vi.doUnmock("@/lib/openai/client");
+    vi.resetModules();
   });
 
   it("falls back detectedPartnerTone to neutral on an invalid value", async () => {
