@@ -622,6 +622,8 @@
         replies: null,
         detectedPartnerTone: null,
         partnerToneOverride: null,
+        detectedLanguage: null, // { language, languageCode, confidence } for the partner's latest message
+        incomingMeaning: null, // that latest incoming message translated into userLanguage
 
         languages: [],
         userLanguage: 'en',
@@ -1008,6 +1010,24 @@
         return;
       }
 
+      // "What does their message mean" — shown once, above the tone cards,
+      // whenever the conversation isn't already in the user's own language.
+      if (this.state.activeTab === 'reply' && this.state.detectedLanguage && this.state.detectedLanguage.languageCode !== this.state.userLanguage) {
+        const langName = (window.VRLanguages && window.VRLanguages.getLanguageName(this.state.detectedLanguage.languageCode)) || this.state.detectedLanguage.language;
+        const meaningBlock = document.createElement('div');
+        meaningBlock.className = 'vr-meaning-block';
+        meaningBlock.innerHTML = `
+          <div class="vr-meaning-label">Their message (${langName}) means:</div>
+          <div class="vr-meaning-text">${this.state.incomingMeaning || 'Translating…'}</div>
+        `;
+        body.appendChild(meaningBlock);
+      }
+
+      const partnerLangCode = this.state.detectedLanguage?.languageCode;
+      const partnerLangName = partnerLangCode && partnerLangCode !== this.state.userLanguage
+        ? (window.VRLanguages && window.VRLanguages.getLanguageName(partnerLangCode)) || partnerLangCode
+        : null;
+
       // Display results
       this.tones.forEach((tone) => {
         const variant = this.state.replies[tone.key];
@@ -1030,8 +1050,9 @@
             <span class="vr-card-tone-dot" style="background: ${dotColor}"></span>
             <span>${tone.name}</span>
           </div>
+          ${partnerLangName ? '<div class="vr-card-sublabel">Meaning (your language)</div>' : ''}
           <div class="vr-card-text">${variant.text}</div>
-          ${variant.translated ? `<div class="vr-card-translated">${variant.translated}</div>` : ''}
+          ${variant.translated ? `<div class="vr-card-sublabel">Will be sent in ${partnerLangName}</div><div class="vr-card-translated">${variant.translated}</div>` : ''}
           <div class="vr-card-actions">
             <button class="vr-btn vr-btn-ghost copy-btn">Copy</button>
             <button class="vr-btn vr-btn-primary insert-btn">${this.state.activeTab === 'rewrite' ? 'Use' : 'Insert'}</button>
@@ -1204,6 +1225,8 @@
       this.state.error = null;
       this.state.paywall = null;
       this.state.replies = null;
+      this.state.detectedLanguage = null;
+      this.state.incomingMeaning = null;
       this.state.statusMessage = 'Reading context...';
       this.state.iconState = 'loading';
       this._updateFloatingIcon();
@@ -1262,10 +1285,33 @@
       } else {
         this.state.replies = res.data?.replies;
         this.state.iconState = 'suggest';
+
+        // "What does their message mean" — translate the partner's latest
+        // message into the user's own language, using the same language
+        // the backend already auto-detected for this exchange. This is a
+        // second, separate request (not blocking the replies above) so a
+        // slow/failed translation never holds up showing the suggestions.
+        const detected = res.data?.meta?.detectedLanguage;
+        this.state.detectedLanguage = detected || null;
+        if (detected && detected.languageCode && detected.languageCode !== this.state.userLanguage) {
+          const lastIncoming = [...messages].reverse().find((m) => m.type === 'incoming');
+          if (lastIncoming) {
+            this._fetchIncomingMeaning(scrubPII(lastIncoming.text));
+          }
+        }
       }
       this._updateFloatingIcon();
       this._renderPanel();
       this.reposition();
+    }
+
+    async _fetchIncomingMeaning(text) {
+      const res = await send(MSG.TRANSLATE, { text, targetLanguage: this.state.userLanguage });
+      if (res.ok && res.data?.translatedText) {
+        this.state.incomingMeaning = res.data.translatedText;
+        this._renderPanel();
+        this.reposition();
+      }
     }
 
     async _translate(text) {
@@ -1563,6 +1609,35 @@
       border-top: 1px dashed rgba(255, 255, 255, 0.08);
       padding-top: 8px;
       margin-top: 2px;
+    }
+    .vr-card-sublabel {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: #6e7681;
+      margin-top: 2px;
+    }
+    .vr-meaning-block {
+      background: rgba(6, 182, 212, 0.06);
+      border: 1px solid rgba(6, 182, 212, 0.2);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 4px;
+    }
+    .vr-meaning-label {
+      font-size: 9.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: #06b6d4;
+      margin-bottom: 4px;
+    }
+    .vr-meaning-text {
+      font-size: 12.5px;
+      line-height: 1.5;
+      color: #e6edf3;
+      white-space: pre-wrap;
     }
     .vr-card-actions {
       display: flex;
