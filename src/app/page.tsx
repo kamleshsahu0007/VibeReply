@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Playground from "@/app/components/Playground";
 import Starfield from "@/app/components/Starfield";
 
@@ -22,7 +23,10 @@ export default async function Home() {
       <Playground />
 
       <footer className="footer">
-        <p>VibeReply Engine • Systems Operations Active</p>
+        <p>
+          VibeReply Engine • Systems Operations Active ·{" "}
+          <Link href="/privacy" style={{ color: "inherit" }}>Privacy Policy</Link>
+        </p>
       </footer>
     </div>
   );

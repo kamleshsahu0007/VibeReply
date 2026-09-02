@@ -1,6 +1,26 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { Plus_Jakarta_Sans, Space_Grotesk } from "next/font/google";
 import "@/app/globals.css";
+
+// Self-hosted via next/font instead of a CSS @import from Google Fonts —
+// the @import was render-blocking (extra round-trip before the page could
+// paint) and caused a font swap after load (contributing to Cumulative
+// Layout Shift). next/font downloads at build time, serves from this
+// origin, and sizes the fallback font to match, so there's no layout jump.
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-plus-jakarta-sans",
+  display: "swap",
+});
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-space-grotesk",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "VibeReply — AI Reply & Translate Assistant for Any Language, Any Chat App",
@@ -33,12 +53,21 @@ const jsonLd = {
       "@id": "https://vibe-reply-seven.vercel.app/#website",
       "url": "https://vibe-reply-seven.vercel.app",
       "name": "VibeReply",
-      "description": "Contextual AI reply and translation companion supporting 180+ languages"
+      "description": "Contextual AI reply and translation companion supporting 180+ languages",
+      "publisher": { "@id": "https://vibe-reply-seven.vercel.app/#organization" }
+    },
+    {
+      "@type": "Organization",
+      "@id": "https://vibe-reply-seven.vercel.app/#organization",
+      "name": "VibeReply",
+      "url": "https://vibe-reply-seven.vercel.app",
+      "sameAs": ["https://github.com/kamleshsahu0007/VibeReply"]
     },
     {
       "@type": "SoftwareApplication",
       "@id": "https://vibe-reply-seven.vercel.app/#software",
       "name": "VibeReply",
+      "publisher": { "@id": "https://vibe-reply-seven.vercel.app/#organization" },
       "operatingSystem": "Windows, macOS, Linux, ChromeOS",
       "applicationCategory": "BrowserApplication, CommunicationApplication",
       "browserRequirements": "Google Chrome, Microsoft Edge, Brave, Opera",
@@ -77,7 +106,31 @@ const jsonLd = {
           "name": "Does VibeReply respect my privacy?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes, VibeReply values your privacy. It processes contexts locally and supports local database integrations. No credentials or chat history are saved on third-party servers."
+            "text": "Yes. VibeReply only reads the message you're actively replying to, redacts phone numbers/emails/codes/card numbers before sending anything to its API, never auto-sends on your behalf, and never stores your conversation content on its servers. Full details are in the privacy policy at vibe-reply-seven.vercel.app/privacy."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is VibeReply free to use?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, VibeReply is free to install and use, with no account required to get started."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which browsers and websites does VibeReply work with?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "VibeReply works in Chrome and Microsoft Edge. It has dedicated support for WhatsApp Web, LinkedIn, Gmail, Slack, and Microsoft Teams, and works generically on any other website with a text input field, similar to how Grammarly works everywhere."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How is VibeReply different from Grammarly?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Grammarly focuses on grammar and clarity. VibeReply focuses on meaning, tone, and cross-language conversation: it reads the conversation you're replying to, matches a tone you choose, and can translate your reply into the other person's language while showing you what their message and your reply both mean in your own language."
           }
         },
         {
@@ -103,7 +156,7 @@ const jsonLd = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${plusJakartaSans.variable} ${spaceGrotesk.variable}`}>
       <body>
         <script
           type="application/ld+json"

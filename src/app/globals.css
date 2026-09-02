@@ -1,5 +1,6 @@
 /* 2050 AD Futuristic Cyber-Holographic Design System */
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+/* Fonts are loaded via next/font in layout.tsx (self-hosted, no
+   render-blocking @import) and exposed here as CSS variables. */
 
 :root {
   --bg: #02020a;
@@ -28,7 +29,7 @@
 body {
   background-color: var(--bg);
   color: var(--fg);
-  font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+  font-family: var(--font-plus-jakarta-sans), -apple-system, sans-serif;
   overflow-x: hidden;
   min-height: 100vh;
   position: relative;
@@ -97,7 +98,7 @@ header {
   border: 1px solid rgba(0, 242, 254, 0.2);
   padding: 5px 14px;
   border-radius: 4px;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--font-space-grotesk), sans-serif;
   font-size: 0.75rem;
   font-weight: 700;
   color: var(--accent);
@@ -108,7 +109,7 @@ header {
 }
 
 h1 {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--font-space-grotesk), sans-serif;
   font-size: 4rem;
   font-weight: 700;
   margin: 0 0 1rem;
@@ -166,7 +167,7 @@ h1 {
 }
 
 .card-title {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--font-space-grotesk), sans-serif;
   font-size: 1.5rem;
   font-weight: 600;
   margin-top: 0;
@@ -276,7 +277,7 @@ input:checked + .slider:before {
 
 /* Cybernetic Buttons */
 .btn {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--font-space-grotesk), sans-serif;
   font-weight: 700;
   border-radius: var(--radius-sm);
   cursor: pointer;
@@ -365,7 +366,7 @@ input:checked + .slider:before {
   margin-top: 5rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--font-space-grotesk), sans-serif;
 }
 
 /* Animations */

@@ -16,6 +16,7 @@ Key facts:
 ## Pages
 
 - [Homepage](https://vibe-reply-seven.vercel.app/): Product overview, live demo playground, and download links.
+- [Privacy Policy](https://vibe-reply-seven.vercel.app/privacy): What data is read, what's sent to the API, what's stored, and what never happens.
 
 ## Common questions this site can answer
 
@@ -24,3 +25,5 @@ Key facts:
 - Which apps/websites does VibeReply work on? (WhatsApp Web, LinkedIn, Gmail, Slack, Microsoft Teams, and any other site with a text box.)
 - Is VibeReply free?
 - Does VibeReply auto-send messages? (No — it only inserts a draft; the user must send it themselves.)
+- How is VibeReply different from Grammarly? (Grammarly corrects grammar; VibeReply reads conversational context, matches tone, and translates across languages.)
+- Does VibeReply read my whole message history? (No — only the currently visible conversation, and only when you ask it for a suggestion.)
