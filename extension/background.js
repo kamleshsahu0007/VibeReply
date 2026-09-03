@@ -13,14 +13,11 @@ const CONFIG = {
     generate: '/api/generate-replies',
     tones: '/api/tones',
     feedback: '/api/v1/suggestions/feedback',
+    createCheckoutSession: '/api/stripe/create-checkout-session',
+    subscriptionStatus: '/api/subscription-status',
   },
   REQUEST_TIMEOUT_MS: 20_000,
   RATE_LIMIT: { capacity: 5, refillPerSec: 0.5 }, // 5 burst, ~1 every 2s
-
-  // Placeholder — replace with a real Stripe Payment Link (or a backend
-  // endpoint that creates a Checkout Session). There's no billing backend
-  // in this repo yet, so this is unwired until one exists.
-  STRIPE_CHECKOUT_URL: 'https://buy.stripe.com/REPLACE_ME',
 };
 
 // Lets a developer point the extension at a local backend without editing
@@ -151,6 +148,38 @@ function countWords(text) {
   return typeof text === 'string' ? (text.trim().match(/\S+/g) || []).length : 0;
 }
 
+// Checked before every generate/translate call. Cached briefly so a paying
+// user doesn't hit the backend on every single request, but short enough
+// that returning from Stripe checkout unlocks PRO within a few minutes
+// without needing to reopen the extension or wait out a long TTL.
+const SUBSCRIPTION_CACHE_TTL_MS = 5 * 60 * 1000;
+let subscriptionCacheMemo = null;
+
+async function getSubscriptionStatus() {
+  const now = Date.now();
+  if (subscriptionCacheMemo && now - subscriptionCacheMemo.fetchedAt < SUBSCRIPTION_CACHE_TTL_MS) {
+    return subscriptionCacheMemo.subscribed;
+  }
+  const { subscriptionCache } = await chrome.storage.local.get('subscriptionCache');
+  if (subscriptionCache && now - subscriptionCache.fetchedAt < SUBSCRIPTION_CACHE_TTL_MS) {
+    subscriptionCacheMemo = subscriptionCache;
+    return subscriptionCache.subscribed;
+  }
+
+  try {
+    const res = await apiFetch(CONFIG.ENDPOINTS.subscriptionStatus, { method: 'GET' });
+    const data = await res.json();
+    const subscribed = !!(data?.success && data.subscribed);
+    subscriptionCacheMemo = { subscribed, fetchedAt: now };
+    await chrome.storage.local.set({ subscriptionCache: subscriptionCacheMemo });
+    return subscribed;
+  } catch (err) {
+    // A network hiccup shouldn't silently grant free access — fall back to
+    // the last known value (even if stale) rather than assuming subscribed.
+    return subscriptionCache ? subscriptionCache.subscribed : false;
+  }
+}
+
 /* --------------------------- Request handlers --------------------------- */
 
 // payload: { task: 'reply'|'rewrite', messages, draft?, partnerTone?, toneKeys?, userLanguage?, partnerLanguage? }
@@ -159,7 +188,8 @@ async function handleGenerate(payload) {
     return { ok: false, error: 'rate_limited', retryAfterMs: 2000 };
   }
 
-  const quota = await VRTrial.checkQuota();
+  const isSubscribed = await getSubscriptionStatus();
+  const quota = await VRTrial.checkQuota(isSubscribed);
   if (!quota.allowed) {
     return { ok: false, error: 'paywall', data: quota };
   }
@@ -204,7 +234,8 @@ async function handleTranslate(payload) {
     return { ok: false, error: 'rate_limited', retryAfterMs: 2000 };
   }
 
-  const quota = await VRTrial.checkQuota();
+  const isSubscribed = await getSubscriptionStatus();
+  const quota = await VRTrial.checkQuota(isSubscribed);
   if (!quota.allowed) {
     return { ok: false, error: 'paywall', data: quota };
   }
@@ -364,8 +395,22 @@ async function handleClearAllConversations() {
 }
 
 async function handleOpenCheckout() {
-  await chrome.tabs.create({ url: CONFIG.STRIPE_CHECKOUT_URL });
-  return { ok: true };
+  try {
+    const res = await apiFetch(CONFIG.ENDPOINTS.createCheckoutSession, { method: 'POST', body: {} });
+    const data = await res.json();
+    if (!data?.success || !data.url) {
+      return { ok: false, error: data?.error?.message || 'checkout_unavailable' };
+    }
+    await chrome.tabs.create({ url: data.url });
+    // The user is about to pay in that new tab — don't let a cached "not
+    // subscribed" answer block them for up to SUBSCRIPTION_CACHE_TTL_MS
+    // after they come back.
+    subscriptionCacheMemo = null;
+    await chrome.storage.local.remove('subscriptionCache');
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err?.message || 'network_error' };
+  }
 }
 
 // Habit-analytics stats card (streak, words generated, time saved) — pure

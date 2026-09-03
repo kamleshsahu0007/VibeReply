@@ -16,6 +16,15 @@ model Device {
   createdAt DateTime @default(now())
 
   toneProfiles ToneProfile[]
+
+  // Stripe subscription state. All nullable — most devices never pay.
+  // subscriptionStatus mirrors Stripe's own status strings ("active",
+  // "trialing", "past_due", "canceled", "unpaid", ...) so the webhook
+  // handler can just pass them through rather than inventing its own enum.
+  stripeCustomerId     String?   @unique
+  stripeSubscriptionId String?   @unique
+  subscriptionStatus   String?
+  subscriptionUpdatedAt DateTime?
 }
 
 // A tone the reply/rewrite engine can generate in. Rows with deviceId = null

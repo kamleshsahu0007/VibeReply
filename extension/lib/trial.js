@@ -136,8 +136,17 @@ export async function getWeeklyTimeSavedMinutes() {
 /**
  * Gate to call before generating a reply/translation.
  * Returns { allowed: true, tier, ... } or { allowed: false, tier, reason, ... }.
+ *
+ * isSubscribed comes from the backend's /api/subscription-status (checked
+ * and cached by background.js, not by this module — this file only ever
+ * touches chrome.storage.local, no network calls of its own) and always
+ * wins: a paying user is never gated by the local trial/daily-limit logic.
  */
-export async function checkQuota() {
+export async function checkQuota(isSubscribed = false) {
+  if (isSubscribed) {
+    return { allowed: true, tier: 'pro' };
+  }
+
   const { tier, trialActive, trialDaysRemaining } = await getTierState();
   if (trialActive) {
     return { allowed: true, tier, trialDaysRemaining };
