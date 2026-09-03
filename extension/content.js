@@ -1474,6 +1474,7 @@
       position: fixed;
       z-index: 2147483647;
       width: 340px;
+      max-width: calc(100vw - 16px);
       background: rgba(13, 17, 23, 0.85);
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 16px;

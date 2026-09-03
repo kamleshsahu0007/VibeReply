@@ -834,6 +834,15 @@ export default function Playground() {
             padding-top: 1.5rem;
           }
         }
+        @media (max-width: 480px) {
+          .sandbox-panel,
+          .tones-panel {
+            gap: 1rem;
+          }
+          .tone-list {
+            max-height: 320px;
+          }
+        }
         .tone-list {
           display: flex;
           flex-direction: column;
