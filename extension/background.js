@@ -13,7 +13,7 @@ const CONFIG = {
     generate: '/api/generate-replies',
     tones: '/api/tones',
     feedback: '/api/v1/suggestions/feedback',
-    createCheckoutSession: '/api/stripe/create-checkout-session',
+    createCheckoutSession: '/api/razorpay/create-subscription',
     subscriptionStatus: '/api/subscription-status',
   },
   REQUEST_TIMEOUT_MS: 20_000,

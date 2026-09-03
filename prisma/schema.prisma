@@ -17,14 +17,15 @@ model Device {
 
   toneProfiles ToneProfile[]
 
-  // Stripe subscription state. All nullable — most devices never pay.
-  // subscriptionStatus mirrors Stripe's own status strings ("active",
-  // "trialing", "past_due", "canceled", "unpaid", ...) so the webhook
-  // handler can just pass them through rather than inventing its own enum.
-  stripeCustomerId     String?   @unique
-  stripeSubscriptionId String?   @unique
-  subscriptionStatus   String?
-  subscriptionUpdatedAt DateTime?
+  // Razorpay subscription state. All nullable — most devices never pay.
+  // subscriptionStatus mirrors Razorpay's own status strings ("created",
+  // "authenticated", "active", "pending", "halted", "cancelled",
+  // "completed", "expired") so the webhook handler just passes them
+  // through rather than inventing its own enum. Only "active" grants PRO
+  // access — see subscription.service.ts.
+  razorpaySubscriptionId String?   @unique
+  subscriptionStatus     String?
+  subscriptionUpdatedAt  DateTime?
 }
 
 // A tone the reply/rewrite engine can generate in. Rows with deviceId = null
