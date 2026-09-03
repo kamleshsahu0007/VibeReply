@@ -234,36 +234,19 @@ async function callOpenAI(
   throw lastErr instanceof Error ? lastErr : new UpstreamError("No model available");
 }
 
-interface SingleToneResult {
-  toneKey: string;
-  variant: ReplyBundle[string];
-  detectedPartnerTone: PartnerTone;
-  detectedLanguage?: LanguageDetection;
-  model: string;
-  usage?: OpenAI.Completions.CompletionUsage;
-}
-
-// One API call per tone, run in parallel, instead of a single call asking
-// for every tone at once. A model generates output token-by-token, so one
-// combined N-tone request takes roughly N times as long as a single tone —
-// this cuts wall-clock latency down to roughly one tone's worth of
-// generation time regardless of how many tones are requested. Trade-off:
-// each parallel call resends the full system/conversation context, so total
-// input-token cost scales up with tone count instead of being shared.
-async function generateSingleTone(
+export async function generateReplies(
   input: GenerateRepliesInput,
-  tone: ToneProfile,
-  signal: AbortSignal | undefined,
-  startedAt: number
-): Promise<SingleToneResult> {
-  const { system, user, needsTranslation, autoDetectLanguage } = buildPrompt({ ...input, tones: [tone] });
-  const jsonSchema = buildJsonSchema([tone], needsTranslation, autoDetectLanguage);
+  options: GenerateRepliesOptions = {}
+): Promise<Omit<GenerateRepliesResponse, "success">> {
+  const { system, user, needsTranslation, autoDetectLanguage } = buildPrompt(input);
+  const jsonSchema = buildJsonSchema(input.tones, needsTranslation, autoDetectLanguage);
 
+  const startedAt = Date.now();
   const completion = await callOpenAI(
     {
       temperature: input.task === "rewrite" ? 0.6 : 0.9,
       top_p: 0.95,
-      max_tokens: 600, // one tone's worth: up to 500 chars text + 500 chars translated + schema overhead
+      max_tokens: Math.max(800, 450 * input.tones.length + 300),
       response_format: {
         type: "json_schema",
         json_schema: jsonSchema,
@@ -273,7 +256,7 @@ async function generateSingleTone(
         { role: "user", content: user },
       ],
     },
-    signal,
+    options.signal,
     startedAt
   );
 
@@ -282,69 +265,33 @@ async function generateSingleTone(
     throw new InvalidModelOutputError("Model returned an empty response");
   }
 
-  const { replies, detectedPartnerTone, detectedLanguage } = parseAndValidate(content, [tone], needsTranslation);
-
-  return {
-    toneKey: tone.key,
-    variant: replies[tone.key],
-    detectedPartnerTone,
-    detectedLanguage,
-    model: completion.model || OPENAI_MODEL_CHAIN[0],
-    usage: completion.usage,
-  };
-}
-
-export async function generateReplies(
-  input: GenerateRepliesInput,
-  options: GenerateRepliesOptions = {}
-): Promise<Omit<GenerateRepliesResponse, "success">> {
-  const startedAt = Date.now();
-
-  const results = await Promise.all(
-    input.tones.map((tone) => generateSingleTone(input, tone, options.signal, startedAt))
+  const { replies, detectedPartnerTone, detectedLanguage } = parseAndValidate(
+    content,
+    input.tones,
+    needsTranslation
   );
-
-  const replies = {} as ReplyBundle;
-  for (const r of results) {
-    replies[r.toneKey] = r.variant;
-  }
-
-  // Language/partner-tone detection is about the incoming message, not any
-  // one tone's phrasing, so every parallel call was asked to detect it
-  // independently — they should agree; report the first.
-  const first = results[0];
   const latencyMs = Date.now() - startedAt;
 
-  const usage = results.reduce(
-    (acc, r) => ({
-      prompt_tokens: acc.prompt_tokens + (r.usage?.prompt_tokens ?? 0),
-      completion_tokens: acc.completion_tokens + (r.usage?.completion_tokens ?? 0),
-      total_tokens: acc.total_tokens + (r.usage?.total_tokens ?? 0),
-    }),
-    { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 }
-  );
-
   logger.info("openai.completion", {
-    model: first.model,
+    model: completion.model,
     elapsed: latencyMs,
     task: input.task,
-    toneCount: input.tones.length,
-    promptTokens: usage.prompt_tokens,
-    completionTokens: usage.completion_tokens,
-    totalTokens: usage.total_tokens,
+    promptTokens: completion.usage?.prompt_tokens,
+    completionTokens: completion.usage?.completion_tokens,
+    totalTokens: completion.usage?.total_tokens,
   });
 
   return {
     replies,
     meta: {
-      model: first.model,
+      model: completion.model || OPENAI_MODEL_CHAIN[0],
       latencyMs,
       task: input.task,
-      detectedPartnerTone: first.detectedPartnerTone,
-      usedPartnerTone: input.partnerTone ?? first.detectedPartnerTone,
+      detectedPartnerTone,
+      usedPartnerTone: input.partnerTone ?? detectedPartnerTone,
       userLanguage: input.userLanguage,
       partnerLanguage: input.partnerLanguage,
-      detectedLanguage: first.detectedLanguage,
+      detectedLanguage,
     },
   };
 }

@@ -22,13 +22,6 @@ function completion(content: unknown, model = "gpt-4.1-mini") {
   };
 }
 
-// generateReplies now makes one parallel call per tone rather than one
-// combined call — queue a mock response per tone, in the same order as the
-// `tones` array passed in (Promise.all issues them in that order).
-function queueToneResponses(...contents: unknown[]) {
-  for (const c of contents) createMock.mockResolvedValueOnce(completion(c));
-}
-
 const TONES: ToneProfile[] = [
   {
     id: "t-mature",
@@ -71,36 +64,13 @@ beforeEach(() => {
 });
 
 describe("generateReplies", () => {
-  it("makes one parallel call per tone instead of one combined call", async () => {
-    queueToneResponses(
-      { mature: { text: "Sounds good." }, detectedPartnerTone: "friendly" },
-      { casual: { text: "kk sounds good" }, detectedPartnerTone: "friendly" }
-    );
-
-    await generateReplies({
-      task: "reply",
-      messages: [{ sender: "Them", text: "Are we still on for tomorrow?", type: "incoming" }],
-      tones: TONES,
-      userLanguage: "en",
-      partnerLanguage: "en",
-    });
-
-    expect(createMock).toHaveBeenCalledTimes(2);
-    // Each call's schema should only require the ONE tone it's asking for.
-    expect(createMock.mock.calls[0][0].response_format.json_schema.schema.required).toEqual([
-      "mature",
-      "detectedPartnerTone",
-    ]);
-    expect(createMock.mock.calls[1][0].response_format.json_schema.schema.required).toEqual([
-      "casual",
-      "detectedPartnerTone",
-    ]);
-  });
-
   it("omits translated fields and detectedLanguage when userLanguage === partnerLanguage", async () => {
-    queueToneResponses(
-      { mature: { text: "Sounds good." }, detectedPartnerTone: "friendly" },
-      { casual: { text: "kk sounds good" }, detectedPartnerTone: "friendly" }
+    createMock.mockResolvedValueOnce(
+      completion({
+        mature: { text: "Sounds good." },
+        casual: { text: "kk sounds good" },
+        detectedPartnerTone: "friendly",
+      })
     );
 
     const result = await generateReplies({
@@ -122,17 +92,13 @@ describe("generateReplies", () => {
   });
 
   it("requires translated text + detectedLanguage when partnerLanguage is auto-detected", async () => {
-    queueToneResponses(
-      {
+    createMock.mockResolvedValueOnce(
+      completion({
         mature: { text: "Yes, I reviewed it and will share feedback shortly.", translated: "Так, я переглянув документ і незабаром поділюся відгуками." },
-        detectedPartnerTone: "friendly",
-        detectedLanguage: { language: "Ukrainian", languageCode: "uk", confidence: 0.97 },
-      },
-      {
         casual: { text: "yep checked it, will send feedback soon", translated: "так, перевірив, скоро надішлю відгук" },
         detectedPartnerTone: "friendly",
         detectedLanguage: { language: "Ukrainian", languageCode: "uk", confidence: 0.97 },
-      }
+      })
     );
 
     const result = await generateReplies({
@@ -152,9 +118,12 @@ describe("generateReplies", () => {
   });
 
   it("requires translated text when an explicit partnerLanguage differs from userLanguage", async () => {
-    queueToneResponses(
-      { mature: { text: "Sounds good.", translated: "Звучить добре." }, detectedPartnerTone: "friendly" },
-      { casual: { text: "kk", translated: "ок" }, detectedPartnerTone: "friendly" }
+    createMock.mockResolvedValueOnce(
+      completion({
+        mature: { text: "Sounds good.", translated: "Звучить добре." },
+        casual: { text: "kk", translated: "ок" },
+        detectedPartnerTone: "friendly",
+      })
     );
 
     const result = await generateReplies({
@@ -172,7 +141,9 @@ describe("generateReplies", () => {
   });
 
   it("uses a lower temperature for rewrite than reply", async () => {
-    createMock.mockResolvedValue(completion({ mature: { text: "ok" }, casual: { text: "ok" }, detectedPartnerTone: "neutral" }));
+    createMock.mockResolvedValue(
+      completion({ mature: { text: "ok" }, casual: { text: "ok" }, detectedPartnerTone: "neutral" })
+    );
 
     await generateReplies({
       task: "rewrite",
@@ -191,15 +162,18 @@ describe("generateReplies", () => {
       userLanguage: "en",
       partnerLanguage: "en",
     });
-    const replyTemp = createMock.mock.calls[2][0].temperature; // calls 0-1 were the rewrite's two tones
+    const replyTemp = createMock.mock.calls[1][0].temperature;
 
     expect(rewriteTemp).toBeLessThan(replyTemp);
   });
 
   it("throws InvalidModelOutputError when a tone's translated field is missing but required", async () => {
-    queueToneResponses(
-      { mature: { text: "Sounds good." }, detectedPartnerTone: "friendly" }, // missing .translated
-      { casual: { text: "kk", translated: "ок" }, detectedPartnerTone: "friendly" }
+    createMock.mockResolvedValueOnce(
+      completion({
+        mature: { text: "Sounds good." },
+        casual: { text: "kk" },
+        detectedPartnerTone: "friendly",
+      })
     );
 
     await expect(
@@ -286,17 +260,21 @@ describe("generateReplies", () => {
       OPENAI_MODEL_CHAIN: ["gpt-4.1-mini", "gpt-4o-mini"],
     }));
 
-    // Single-tone request: one model failure, one fallback success.
     localCreateMock
       .mockRejectedValueOnce(new OpenAI.APIError(500, { message: "primary model down" }, "down", {}))
-      .mockResolvedValueOnce(completion({ mature: { text: "ok" }, detectedPartnerTone: "neutral" }, "gpt-4o-mini"));
+      .mockResolvedValueOnce(
+        completion(
+          { mature: { text: "ok" }, casual: { text: "ok" }, detectedPartnerTone: "neutral" },
+          "gpt-4o-mini"
+        )
+      );
 
     const { generateReplies: generateRepliesIsolated } = await import("./reply.service");
 
     const result = await generateRepliesIsolated({
       task: "reply",
       messages: [{ sender: "Them", text: "hey", type: "incoming" }],
-      tones: [TONES[0]],
+      tones: TONES,
       userLanguage: "en",
       partnerLanguage: "en",
     });
@@ -311,9 +289,12 @@ describe("generateReplies", () => {
   });
 
   it("falls back detectedPartnerTone to neutral on an invalid value", async () => {
-    queueToneResponses(
-      { mature: { text: "ok" }, detectedPartnerTone: "not-a-real-tone" },
-      { casual: { text: "ok" }, detectedPartnerTone: "not-a-real-tone" }
+    createMock.mockResolvedValueOnce(
+      completion({
+        mature: { text: "ok" },
+        casual: { text: "ok" },
+        detectedPartnerTone: "not-a-real-tone",
+      })
     );
 
     const result = await generateReplies({
