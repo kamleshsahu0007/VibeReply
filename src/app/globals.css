@@ -26,6 +26,13 @@
   padding: 0;
 }
 
+html {
+  /* body already clips its own overflowing ::before/::after glow blobs, but
+     that only clips body's own box — html (the actual scrolling root) still
+     let the page scroll sideways on mobile without this. */
+  overflow-x: hidden;
+}
+
 body {
   background-color: var(--bg);
   color: var(--fg);
