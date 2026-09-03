@@ -395,7 +395,7 @@ export default function Playground() {
                         display: "inline-block",
                       }}
                     />
-                    Computing...
+                    Generating...
                   </>
                 ) : (
                   "Execute Synthesis"
