@@ -3,7 +3,7 @@ import { ZodError } from "zod";
 import { generateRepliesSchema } from "@/lib/validation/schemas";
 import { generateReplies, translateText } from "@/services/replies/reply.service";
 import { getActiveToneProfilesForDevice } from "@/services/tones/tone.service";
-import { defaultRateLimiter, getClientKey } from "@/lib/ratelimit";
+import { assertRateLimit } from "@/lib/ratelimit";
 import { AppError, RateLimitError, ValidationError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
 import { corsHeaders } from "@/lib/cors";
@@ -34,18 +34,13 @@ export async function POST(request: Request) {
   const startedAt = Date.now();
 
   try {
-    const clientKey = getClientKey(request.headers);
-    const rl = await defaultRateLimiter.check(clientKey);
+    const rl = await assertRateLimit(request);
     const rateHeaders = {
       "X-RateLimit-Limit": String(rl.limit),
       "X-RateLimit-Remaining": String(rl.remaining),
       "X-RateLimit-Reset": String(Math.ceil(rl.resetAtMs / 1000)),
       "X-Request-Id": requestId,
     };
-
-    if (!rl.allowed) {
-      throw new RateLimitError(rl.retryAfterMs);
-    }
 
     let payload: unknown;
     try {

@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 import { toneProfileInputSchema } from "@/lib/validation/schemas";
 import { getToneProfilesForDevice, upsertDeviceTone } from "@/services/tones/tone.service";
-import { ValidationError } from "@/lib/errors";
+import { RateLimitError, ValidationError } from "@/lib/errors";
+import { assertRateLimit, tonesRateLimiter } from "@/lib/ratelimit";
 import { corsHeaders } from "@/lib/cors";
 import type { ErrorResponse } from "@/types";
 
@@ -15,12 +16,31 @@ export async function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: CORS });
 }
 
-function errorResponse(code: string, message: string, status: number, details?: unknown) {
+function errorResponse(
+  code: string,
+  message: string,
+  status: number,
+  details?: unknown,
+  extraHeaders?: Record<string, string>
+) {
   const body: ErrorResponse = { success: false, error: { code, message, details } };
-  return NextResponse.json(body, { status, headers: CORS });
+  return NextResponse.json(body, { status, headers: { ...CORS, ...extraHeaders } });
+}
+
+function rateLimitResponse(err: RateLimitError) {
+  return errorResponse(err.code, err.message, err.status, undefined, {
+    "Retry-After": String(Math.ceil(err.retryAfterMs / 1000)),
+  });
 }
 
 export async function GET(request: Request) {
+  try {
+    await assertRateLimit(request, tonesRateLimiter);
+  } catch (err) {
+    if (err instanceof RateLimitError) return rateLimitResponse(err);
+    throw err;
+  }
+
   const deviceId = request.headers.get("x-device-id");
   const tones = await getToneProfilesForDevice(deviceId);
   return NextResponse.json({ success: true, tones }, { headers: CORS });
@@ -28,6 +48,8 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    await assertRateLimit(request, tonesRateLimiter);
+
     const deviceId = request.headers.get("x-device-id");
     if (!deviceId) {
       throw new ValidationError("X-Device-Id header is required to save tone preferences");
@@ -52,6 +74,9 @@ export async function POST(request: Request) {
         400,
         err.issues.map((i) => ({ path: i.path, message: i.message, code: i.code }))
       );
+    }
+    if (err instanceof RateLimitError) {
+      return rateLimitResponse(err);
     }
     if (err instanceof ValidationError) {
       return errorResponse(err.code, err.message, err.status, err.details);
