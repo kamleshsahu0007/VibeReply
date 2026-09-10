@@ -86,12 +86,12 @@ Highlights:
 
 Validation fail hone par `400 VALIDATION_ERROR` with per-field issue details.
 
-## Razorpay Webhook Security
+## Stripe Webhook Security
 
-`/api/razorpay/webhook` **CORS use nahi karta** (server-to-server hai) — authentication
-`X-Razorpay-Signature` header ke HMAC verification se hoti hai
-(`Razorpay.validateWebhookSignature()`, `RAZORPAY_WEBHOOK_SECRET` se). Invalid ya missing
-signature = `400`, secret configured na ho to `503`.
+`/api/stripe/webhook` **CORS use nahi karta** (server-to-server hai) — authentication
+`stripe-signature` header ke HMAC verification se hoti hai
+(`stripe.webhooks.constructEvent()`, `STRIPE_WEBHOOK_SECRET` se). Invalid ya missing
+signature = `400`, secret configured na ho to `503`. Raw request body se verify hota hai.
 
 ## Structured error handling
 
@@ -127,5 +127,5 @@ storage"*). Asli enforcement layer server-side rate-limiter hi hai. Detail
 ## Abhi ke known gaps (honestly documented)
 
 Dekho [15-known-issues-roadmap.md](15-known-issues-roadmap.md) — jaise `/api/subscription-status`
-aur `/api/razorpay/create-subscription` par abhi rate-limiting nahi hai, aur IP-based limiting
+aur `/api/stripe/create-checkout-session` par abhi rate-limiting nahi hai, aur IP-based limiting
 distributed/botnet abuse ko fully nahi rok sakta.

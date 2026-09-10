@@ -17,13 +17,13 @@ model Device {
 
   toneProfiles ToneProfile[]
 
-  // Razorpay subscription state. All nullable — most devices never pay.
-  // subscriptionStatus mirrors Razorpay's own status strings ("created",
-  // "authenticated", "active", "pending", "halted", "cancelled",
-  // "completed", "expired") so the webhook handler just passes them
-  // through rather than inventing its own enum. Only "active" grants PRO
+  // Stripe subscription state. All nullable — most devices never pay.
+  // subscriptionStatus mirrors Stripe's own status strings ("active",
+  // "trialing", "past_due", "canceled", "unpaid", "incomplete",
+  // "incomplete_expired", "paused"). Both "active" and "trialing" grant PRO
   // access — see subscription.service.ts.
-  razorpaySubscriptionId String?   @unique
+  stripeCustomerId       String?   @unique
+  stripeSubscriptionId   String?   @unique
   subscriptionStatus     String?
   subscriptionUpdatedAt  DateTime?
 }

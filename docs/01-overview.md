@@ -52,7 +52,7 @@ generate hota hai, server ko sirf ek UUID header ke through pata chalta hai).
    ("I understand how you feel", "As an AI"...) block karta hai. Dekho
    [09-ai-engine-tones.md](09-ai-engine-tones.md).
 5. **Freemium model** — 30-din ka free PRO trial, uske baad free tier me daily 5 generations/day,
-   aur ek paid PRO subscription (Razorpay se, unlimited) available hai.
+   aur ek paid PRO subscription (Stripe se, global unlimited) available hai.
 
 ## High-level Components
 
@@ -61,7 +61,7 @@ generate hota hai, server ko sirf ek UUID header ke through pata chalta hai).
 │   Chrome Extension (MV3)     │  HTTP  │   Next.js Backend (Vercel)     │
 │  - content.js (per-site DOM) │ ─────▶ │  - /api/generate-replies       │
 │  - background.js (network)   │ ◀───── │  - /api/tones (+[key])         │
-│  - popup.js (toolbar UI)     │        │  - /api/razorpay/*             │
+│  - popup.js (toolbar UI)     │        │  - /api/stripe/*               │
 └─────────────────────────────┘        │  - /api/subscription-status    │
                                         │  - Prisma → PostgreSQL         │
                                         │  - OpenAI-compatible SDK → LLM │
@@ -79,7 +79,7 @@ Detail ke liye [04-architecture.md](04-architecture.md) padho.
 | Database | PostgreSQL, Prisma ORM |
 | AI provider | OpenAI-compatible SDK — currently Google Gemini ka OpenAI-compat endpoint |
 | Validation | Zod |
-| Payments | Razorpay (India-first subscriptions) |
+| Payments | Stripe (Global subscriptions, 135+ currencies, Apple/Google Pay, Cards) |
 | Rate limiting | Custom in-memory sliding-window limiter |
 | Testing | Vitest |
 | Client | Chrome Manifest V3 Extension (vanilla JS, no framework) |

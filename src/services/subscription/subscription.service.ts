@@ -1,24 +1,27 @@
 import { prisma } from "@/lib/db/client";
 
-// Razorpay subscription lifecycle: created -> authenticated (mandate
-// approved) -> active (first charge succeeded) -> ... -> cancelled /
-// completed / expired / halted (payment failures). Only "active" means
-// currently paid and entitled — "authenticated" alone hasn't been charged
-// yet, so it must NOT grant access.
+// Mirrors Stripe's own subscription status strings directly (see
+// https://docs.stripe.com/api/subscriptions/object#subscription_object-status)
+// rather than inventing a separate enum — "trialing" here is a trial run
+// through Stripe itself (not VibeReply's own local 30-day trial), and both
+// count as paid access.
+const ACTIVE_STATUSES = new Set(["active", "trialing"]);
+
 export async function isDeviceSubscribed(deviceId: string): Promise<boolean> {
   const device = await prisma.device.findUnique({
     where: { id: deviceId },
     select: { subscriptionStatus: true },
   });
-  return device?.subscriptionStatus === "active";
+  return !!device?.subscriptionStatus && ACTIVE_STATUSES.has(device.subscriptionStatus);
 }
 
 export interface SubscriptionData {
-  razorpaySubscriptionId: string;
+  stripeCustomerId: string;
+  stripeSubscriptionId: string;
   subscriptionStatus: string;
 }
 
-/** Called from the subscription.activated/charged webhook — the device may not have a row yet. */
+/** Called from the checkout.session.completed webhook — the device may not have a row yet. */
 export async function upsertSubscriptionByDeviceId(deviceId: string, data: SubscriptionData): Promise<void> {
   await prisma.device.upsert({
     where: { id: deviceId },
@@ -28,16 +31,16 @@ export async function upsertSubscriptionByDeviceId(deviceId: string, data: Subsc
 }
 
 /**
- * Called from subscription.cancelled/completed/halted/paused — these
- * events reference the subscription itself, not the deviceId directly, so
- * look up by razorpaySubscriptionId (stored once at activation time).
+ * Called from customer.subscription.updated/deleted — these events reference
+ * the subscription, not the original device, so look up by
+ * stripeSubscriptionId (set once at checkout time) instead.
  */
-export async function updateSubscriptionByRazorpaySubscriptionId(
-  razorpaySubscriptionId: string,
+export async function updateSubscriptionByStripeSubscriptionId(
+  stripeSubscriptionId: string,
   subscriptionStatus: string
 ): Promise<void> {
   await prisma.device.updateMany({
-    where: { razorpaySubscriptionId },
+    where: { stripeSubscriptionId },
     data: { subscriptionStatus, subscriptionUpdatedAt: new Date() },
   });
 }

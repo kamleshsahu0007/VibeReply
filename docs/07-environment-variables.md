@@ -35,17 +35,20 @@ karo.
 
 Dono Vercel Postgres Storage tab se milte hain (agar Vercel Postgres use kar rahe ho).
 
-## Razorpay (PRO Subscription)
+## Stripe (PRO Subscription — Global Launch)
 
 | Var | Default | Required? | Purpose |
 | --- | --- | --- | --- |
-| `RAZORPAY_KEY_ID` | — | Checkout ke liye required | Razorpay API key id (`rzp_test_...` ya `rzp_live_...`) |
-| `RAZORPAY_KEY_SECRET` | — | Checkout ke liye required | Matching secret |
-| `RAZORPAY_PLAN_ID` | — | Checkout ke liye required | Recurring monthly plan id (`plan_...`) — bina iske checkout `503` degi |
-| `RAZORPAY_WEBHOOK_SECRET` | — | Webhook ke liye required | Webhook signature verify karne ke liye — bina iske webhook `503` degi |
+| `STRIPE_SECRET_KEY` | — | Checkout & Webhook ke liye required | Stripe Secret key (`sk_test_...` ya `sk_live_...`) |
+| `STRIPE_PRICE_ID` | — | Checkout ke liye required | Recurring subscription price id (`price_...`) — bina iske checkout `503` degi |
+| `STRIPE_WEBHOOK_SECRET` | — | Webhook ke liye required | Webhook signature verify karne ke liye (`whsec_...`) — bina iske webhook `503` degi |
+| `APP_URL` | `https://vibe-reply-seven.vercel.app` | Optional | Stripe checkout success/cancel return URL |
 
-`.env.example` me Razorpay setup ke poore 4-step instructions bhi hain (account banao → Plan
-banao → keys generate karo → webhook secret set karo).
+`.env.example` me Stripe setup ke poore instructions bhi hain:
+1. Stripe account banao (`dashboard.stripe.com`).
+2. Product Catalog me `VibeReply PRO` product banakar monthly recurring Price banayein aur uska `price_...` ID copy karein.
+3. Developers → API Keys se Secret key (`sk_...`) lein.
+4. Developers → Webhooks me endpoint `https://<domain>/api/stripe/webhook` add karke `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted` events select karein aur Signing secret (`whsec_...`) copy karein.
 
 ## App-level
 
@@ -73,5 +76,5 @@ Fir minimum required set karo:
 1. `OPENAI_API_KEY`
 2. `POSTGRES_PRISMA_URL` + `POSTGRES_URL_NON_POOLING`
 
-Baaki sab defaults se local dev chal jaayega. Razorpay sirf tab chahiye jab subscription flow
+Baaki sab defaults se local dev chal jaayega. Stripe sirf tab chahiye jab subscription flow
 test karna ho.
