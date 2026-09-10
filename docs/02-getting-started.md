@@ -103,6 +103,6 @@ npm test             # vitest run
 - **Database empty hone par bhi crash nahi hota** — `tone.service.ts` me agar DB unreachable ho
   to hardcoded default tones fallback ho jaate hain (dekho
   [09-ai-engine-tones.md](09-ai-engine-tones.md)).
-- **Razorpay checkout** sirf tab kaam karega jab `RAZORPAY_PLAN_ID` set ho — nahi to
-  `/api/razorpay/create-subscription` `503 NOT_CONFIGURED` degi (ye intentional hai, crash nahi
+- **Stripe checkout** sirf tab kaam karega jab `STRIPE_PRICE_ID` set ho — nahi to
+  `/api/stripe/create-checkout-session` `503 NOT_CONFIGURED` degi (ye intentional hai, crash nahi
   hota).

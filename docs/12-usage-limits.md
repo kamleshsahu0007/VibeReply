@@ -11,7 +11,7 @@ rate-limiter (dekho [08-rate-limiting-security.md](08-rate-limiting-security.md)
 | --- | --- | --- |
 | **`pro_trial`** | Install ke pehle **30 din** (`TRIAL_DAYS = 30`) | ✅ Unlimited — koi daily cap nahi |
 | **`free`** | 30 din ke baad, agar subscribe nahi kiya | ⚠️ **5 generations/day** (`FREE_DAILY_LIMIT = 5`) |
-| **`pro`** (paid) | Jab tak Razorpay subscription `active` hai | ✅ Unlimited |
+| **`pro`** (paid) | Jab tak Stripe subscription `active` ya `trialing` hai | ✅ Unlimited |
 
 ### Kaise decide hota hai konsa tier?
 

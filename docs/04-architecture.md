@@ -35,13 +35,13 @@
 │         │                                │                              │
 │  app/api/tones[/[key]]      ──▶  services/tones ──▶ Prisma ──▶ Postgres │
 │  app/api/subscription-status──▶  services/subscription ──▶ Prisma       │
-│  app/api/razorpay/*          ──▶  Razorpay SDK + services/subscription  │
+│  app/api/stripe/*            ──▶  Stripe SDK + services/subscription    │
 └────────────────────────────────────────────────────────────────────────┘
                                        │
                      ┌─────────────────┼─────────────────┐
                      ▼                 ▼                 ▼
               ┌───────────┐   ┌────────────────┐  ┌──────────────┐
-              │ PostgreSQL │   │ OpenAI-compat  │  │  Razorpay    │
+              │ PostgreSQL │   │ OpenAI-compat  │  │    Stripe    │
               │ (Prisma)   │   │ LLM (Gemini)   │  │  (payments)  │
               └───────────┘   └────────────────┘  └──────────────┘
 ```

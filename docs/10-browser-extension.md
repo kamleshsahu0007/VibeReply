@@ -32,7 +32,7 @@ kabhi directly `fetch()` nahi karte — hamesha `chrome.runtime.sendMessage()` u
 | `SAVE_TONE` | `handleSaveTone` | Tone create/edit, cache invalidate |
 | `DELETE_TONE` | `handleDeleteTone` | Tone delete, cache invalidate |
 | `CLEAR_ALL_CONVERSATIONS` | `handleClearAllConversations` | Saare tabs ko local-storage clear karne ka signal |
-| `OPEN_CHECKOUT` | `handleOpenCheckout` | Razorpay checkout tab khol deta hai |
+| `OPEN_CHECKOUT` | `handleOpenCheckout` | Stripe checkout tab khol deta hai |
 | `GET_STATS` | `handleGetStats` | Habit stats (streak, words, time-saved) — no network, pure local |
 | `PING` | — | Health check (`{ pong: timestamp }`) |
 

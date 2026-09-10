@@ -13,14 +13,13 @@ Ek row = ek browser-extension install (anonymous).
 | --- | --- | --- |
 | `id` | `String` (UUID, PK) | Client-side generate hota hai (`crypto.randomUUID()`), server bas store karta hai |
 | `createdAt` | `DateTime` | Auto (`@default(now())`) |
-| `razorpaySubscriptionId` | `String?` (unique) | Razorpay subscription ID — jab tak device ne kabhi subscribe na kiya ho, `null` |
-| `subscriptionStatus` | `String?` | Razorpay ke raw status strings: `created`, `authenticated`, `active`, `pending`, `halted`, `cancelled`, `completed`, `expired` |
+| `stripeCustomerId` | `String?` (unique) | Stripe Customer ID (`cus_...`) |
+| `stripeSubscriptionId` | `String?` (unique) | Stripe Subscription ID (`sub_...`) |
+| `subscriptionStatus` | `String?` | Stripe ke raw status strings: `active`, `trialing`, `past_due`, `canceled`, `unpaid`, `incomplete`, `incomplete_expired`, `paused` |
 | `subscriptionUpdatedAt` | `DateTime?` | Last webhook update ka time |
 | `toneProfiles` | relation | Is device ke saare custom/edited tones |
 
-**Important**: Sirf `subscriptionStatus === "active"` hone par hi PRO access milta hai.
-`"authenticated"` ka matlab hai mandate approve ho gaya hai lekin abhi tak charge nahi hua —
-isliye wo access grant nahi karta (dekho `subscription.service.ts` ka comment).
+**Important**: `subscriptionStatus === "active"` ya `"trialing"` hone par PRO access milta hai (dekho `subscription.service.ts`).
 
 Login/account system nahi hai — is `Device` model ko future me ek real `User` model se replace
 kiya ja sakta hai (schema comment me explicitly likha hai: *"this is the seam a real User model
@@ -84,16 +83,15 @@ tones (`src/lib/tones/defaults.ts` se) seed ho sakte hain:
 
 ## Migrations
 
-`prisma/migrations/` me teen migrations hain (chronological):
+`prisma/migrations/` me migrations hain (chronological):
 
 1. `20260826103112_init` — initial schema (`Device`, `ToneProfile`)
-2. `20260903104021_add_stripe_subscription_fields` — subscription fields add hue (originally
-   Stripe ke liye)
-3. `20260903115041_switch_to_razorpay` — Stripe se Razorpay par switch (India-first, kyunki Stripe
-   ne India-based businesses ka onboarding band kar diya)
+2. `20260903104021_add_stripe_subscription_fields` — subscription fields add hue (originally Stripe ke liye)
+3. `20260903115041_switch_to_razorpay` — Stripe se Razorpay par switch (India-first)
+4. `20260910124700_switch_to_stripe` — Global launch ke liye Stripe par switch (135+ currencies, Apple Pay/Google Pay, International Cards)
 
-Ye migration history batata hai ki payment-provider decision recently badla — dekho
-[11-subscription-billing.md](11-subscription-billing.md) is switch ki poori detail ke liye.
+Ye migration history batata hai ki project global launch ke liye Stripe par finalize ho chuka hai — dekho
+[11-subscription-billing.md](11-subscription-billing.md) iski poori detail ke liye.
 
 ## Fail-safe fallback (koi bhi crash na ho)
 

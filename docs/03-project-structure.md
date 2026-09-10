@@ -11,9 +11,9 @@ VibeReply/
 │   │   │   ├── generate-replies/route.ts # POST — reply/rewrite/translate generation (main AI endpoint)
 │   │   │   ├── tones/route.ts            # GET (list) / POST (create ya edit tone)
 │   │   │   ├── tones/[key]/route.ts      # DELETE (custom tone hatao / default revert karo)
-│   │   │   ├── razorpay/
-│   │   │   │   ├── create-subscription/route.ts  # POST — Razorpay checkout link banata hai
-│   │   │   │   └── webhook/route.ts               # POST — Razorpay ke server-to-server events
+│   │   │   ├── stripe/
+│   │   │   │   ├── create-checkout-session/route.ts  # POST — Stripe checkout session link banata hai
+│   │   │   │   └── webhook/route.ts               # POST — Stripe ke server-to-server events
 │   │   │   ├── subscription-status/route.ts        # GET — device PRO hai ya nahi
 │   │   │   └── health/route.ts                      # GET — uptime/health check
 │   │   ├── components/
@@ -32,7 +32,7 @@ VibeReply/
 │   │   ├── logger/index.ts               # Minimal structured JSON logger
 │   │   ├── openai/client.ts              # OpenAI SDK client + model-fallback-chain config
 │   │   ├── ratelimit/index.ts            # In-memory sliding-window rate limiter
-│   │   ├── razorpay/client.ts            # Razorpay SDK client singleton
+│   │   ├── stripe/client.ts              # Stripe SDK client singleton
 │   │   ├── tones/defaults.ts             # 5 hardcoded default tone profiles (funny/soft/flirty/mature/casual)
 │   │   └── validation/schemas.ts         # Zod schemas — request body validation
 │   │

@@ -16,7 +16,7 @@ hain. Har route apna `OPTIONS` handler khud deta hai (CORS preflight ke liye).
   ```
 - **Header `X-Device-Id`** — anonymous device identifier. Kuch routes optional (`generate-replies`,
   `tones` GET), kuch me **required** (`tones` POST/DELETE, `subscription-status`,
-  `razorpay/create-subscription`) — required hone par missing hone se `400 VALIDATION_ERROR`.
+  `stripe/create-checkout-session`) — required hone par missing hone se `400 VALIDATION_ERROR`.
 - **CORS**: `ALLOWED_ORIGIN` env var se control hota hai (default `*`). Allowed headers:
   `Content-Type, X-Device-Id`.
 
@@ -208,9 +208,9 @@ Custom tone poori tarah delete karta hai, ya default tone ke device-override ko 
 
 ---
 
-## `POST /api/razorpay/create-subscription`
+## `POST /api/stripe/create-checkout-session`
 
-PRO subscription ke liye Razorpay checkout link banata hai.
+PRO subscription ke liye Stripe Checkout Session link banata hai (Global reach: 135+ currencies, Cards, Apple Pay, Google Pay).
 
 **Rate limit**: ⚠️ **abhi nahi hai** — dekho [15-known-issues-roadmap.md](15-known-issues-roadmap.md).
 
@@ -219,35 +219,31 @@ PRO subscription ke liye Razorpay checkout link banata hai.
 ### Response — `200`
 
 ```json
-{ "success": true, "url": "https://rzp.io/i/xxxxxxx" }
+{ "success": true, "url": "https://checkout.stripe.com/c/pay/cs_test_xxxxxxx" }
 ```
 
 ### Error codes
 
 - `VALIDATION_ERROR` (400) — `X-Device-Id` missing
-- `NOT_CONFIGURED` (503) — `RAZORPAY_PLAN_ID` env var set nahi hai
-- `INTERNAL_ERROR` (500) — Razorpay API call fail
+- `NOT_CONFIGURED` (503) — `STRIPE_PRICE_ID` env var set nahi hai
+- `INTERNAL_ERROR` (500) — Stripe API call fail
 
-Subscription 120 monthly cycles (10 saal) ke liye create hoti hai — Razorpay me Stripe jaisa
-"indefinite until cancelled" option nahi hai, isliye ye ek practical approximation hai. User kabhi
-bhi cancel kar sakta hai (webhook se handle hota hai).
+Stripe recurring subscription create karta hai ("mode: subscription") jo indefinite until cancelled chalti hai. `allow_promotion_codes: true` enabled hai jisse global coupon/discount codes support hote hain. User checkout complete karke `APP_URL/?checkout=success` par redirect hota hai.
 
 ---
 
-## `POST /api/razorpay/webhook`
+## `POST /api/stripe/webhook`
 
-Razorpay ke apne servers se call hota hai (browser/extension se kabhi nahi) — subscription
-lifecycle events yaha aate hain.
+Stripe ke apne servers se call hota hai (browser/extension se kabhi nahi) — subscription lifecycle events yaha aate hain.
 
-**Auth**: koi CORS nahi (server-to-server hai). `X-Razorpay-Signature` header se HMAC signature
-verify hoti hai (`RAZORPAY_WEBHOOK_SECRET` se) — invalid signature = `400`.
+**Auth**: koi CORS nahi (server-to-server hai). `stripe-signature` header se HMAC signature verify hoti hai (`STRIPE_WEBHOOK_SECRET` se `stripe.webhooks.constructEvent()` dwara) — invalid signature = `400`.
 
 **Handled events**:
 
 | Event | Action |
 | --- | --- |
-| `subscription.activated`, `subscription.charged` | Device ko `subscriptionStatus: "active"` set karta hai (deviceId, `notes.deviceId` se milta hai jo checkout ke waqt attach kiya gaya tha) |
-| `subscription.cancelled`, `subscription.completed`, `subscription.halted`, `subscription.paused` | Device ka status Razorpay ke bheje hue status se update hota hai |
+| `checkout.session.completed` | Device ko `subscriptionStatus: "active"` set karta hai, aur `stripeCustomerId` aur `stripeSubscriptionId` store karta hai (`client_reference_id`/`metadata.deviceId` se) |
+| `customer.subscription.updated`, `customer.subscription.deleted` | Device ka status Stripe ke subscription status (`active`, `past_due`, `canceled`, etc.) se update karta hai (lookup `stripeSubscriptionId` se) |
 
 ### Response
 
@@ -291,7 +287,7 @@ Simple uptime/health check — monitoring ke liye.
 | `/api/tones` | GET | `X-Device-Id` optional | ✅ 60/min | Effective tone list |
 | `/api/tones` | POST | `X-Device-Id` **required** | ✅ 60/min | Create/edit tone |
 | `/api/tones/:key` | DELETE | `X-Device-Id` **required** | ✅ 60/min | Delete/revert tone |
-| `/api/razorpay/create-subscription` | POST | `X-Device-Id` **required** | ❌ | PRO checkout link |
-| `/api/razorpay/webhook` | POST | Razorpay signature | ❌ (not applicable) | Payment lifecycle events |
+| `/api/stripe/create-checkout-session` | POST | `X-Device-Id` **required** | ❌ | PRO checkout session link |
+| `/api/stripe/webhook` | POST | Stripe signature | ❌ (not applicable) | Payment lifecycle events |
 | `/api/subscription-status` | GET | `X-Device-Id` **required** | ❌ | PRO status check |
 | `/api/health` | GET | — | ❌ | Uptime check |

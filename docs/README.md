@@ -18,7 +18,7 @@ naye insaan se leke, koi bhi developer/reviewer/investor sab samajh sakta hai.
 | 08 | [Rate Limiting & Security](08-rate-limiting-security.md) | Abuse-protection, CORS, spoofing-fix ki detail |
 | 09 | [AI Engine & Tones](09-ai-engine-tones.md) | Reply/rewrite/translate engine, prompt design, tone system |
 | 10 | [Browser Extension](10-browser-extension.md) | Chrome MV3 extension — background/content/popup |
-| 11 | [Subscription & Billing](11-subscription-billing.md) | Razorpay PRO subscription flow |
+| 11 | [Subscription & Billing](11-subscription-billing.md) | Stripe Global PRO subscription flow |
 | 12 | [Usage Limits & Tiers](12-usage-limits.md) | Free vs Trial vs PRO — user ke paas kitni limit hai |
 | 13 | [Testing](13-testing.md) | Test suite kaise chalayein, kya cover hai |
 | 14 | [Deployment](14-deployment.md) | Vercel par deploy kaise hota hai |
