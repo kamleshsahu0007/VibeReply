@@ -62,6 +62,12 @@ export default function PricingSection() {
         </div>
       )}
 
+      <div className="vr-pricing-header">
+        <span className="pricing-tag">Simple & Transparent</span>
+        <h2>Choose Your Plan</h2>
+        <p>Start free with no credit card required. Upgrade anytime for unlimited access.</p>
+      </div>
+
       <div className="vr-pricing-grid">
         {/* 1. Free Trial Card */}
         <div className="vr-pricing-card card-free">
@@ -69,35 +75,35 @@ export default function PricingSection() {
             <h3 className="card-title">Free Trial</h3>
             <div className="card-price-row">
               <span className="price-amount">Free</span>
-              <span className="price-period">/7 days</span>
+              <span className="price-period">/30 days</span>
             </div>
-            <p className="card-subtitle">Perfect for trying out AI social media replies</p>
+            <p className="card-subtitle">Full access to AI replies & translations. No credit card required.</p>
           </div>
 
           <ul className="card-features">
             <li>
               <span className="check-icon">✓</span>
-              <span>Generate up to 50 AI posts and replies</span>
+              <span><strong>30-day full access trial</strong></span>
             </li>
             <li>
               <span className="check-icon">✓</span>
-              <span>Basic AI posts and replies for X, LinkedIn, Facebook</span>
+              <span><strong>5 free AI replies daily</strong> after trial</span>
             </li>
             <li>
               <span className="check-icon">✓</span>
-              <span>3 post tone options</span>
+              <span>Works directly in WhatsApp Web & LinkedIn</span>
             </li>
             <li>
               <span className="check-icon">✓</span>
-              <span>4 reply tone options</span>
+              <span>All built-in tone options (Professional, Casual, etc.)</span>
             </li>
             <li>
               <span className="check-icon">✓</span>
-              <span>15 topic categories</span>
+              <span>Translate across 180+ languages</span>
             </li>
             <li>
               <span className="check-icon">✓</span>
-              <span>gpt-4o-mini model</span>
+              <span>Fast gpt-4o-mini AI engine</span>
             </li>
           </ul>
 
@@ -130,35 +136,31 @@ export default function PricingSection() {
           <ul className="card-features">
             <li>
               <span className="check-icon">✓</span>
-              <span>Unlimited AI replies and posts</span>
+              <span><strong>Unlimited</strong> AI replies and translations</span>
             </li>
             <li>
               <span className="check-icon">✓</span>
-              <span>Advanced X, LinkedIn and Facebook AI posts and replies</span>
+              <span>WhatsApp Web, LinkedIn & universal web input support</span>
             </li>
             <li>
               <span className="check-icon">✓</span>
-              <span>Support multiple languages</span>
+              <span>Support for 180+ languages</span>
             </li>
             <li>
               <span className="check-icon">✓</span>
-              <span>4 post tone options</span>
+              <span>All built-in tone options</span>
             </li>
             <li>
               <span className="check-icon">✓</span>
-              <span>5 reply tone options</span>
+              <span>Advanced <strong>gpt-4o</strong> contextual AI model</span>
             </li>
             <li>
               <span className="check-icon">✓</span>
-              <span>25 topic categories</span>
+              <span>Priority response speed</span>
             </li>
             <li>
               <span className="check-icon">✓</span>
-              <span>gpt-4o model</span>
-            </li>
-            <li>
-              <span className="check-icon">✓</span>
-              <span>Priority support</span>
+              <span>Standard support</span>
             </li>
           </ul>
 
@@ -182,7 +184,7 @@ export default function PricingSection() {
               <span className="price-amount">$7.99</span>
               <span className="price-period">/per month</span>
             </div>
-            <p className="card-subtitle">For serious social media influencers</p>
+            <p className="card-subtitle">For power users, creators and professionals</p>
           </div>
 
           <ul className="card-features">
@@ -192,19 +194,19 @@ export default function PricingSection() {
             </li>
             <li>
               <span className="check-icon">✓</span>
-              <span>Custom topics and tone creation (to be released)</span>
+              <span>Custom tone creation & personalized AI personas</span>
             </li>
             <li>
               <span className="check-icon">✓</span>
-              <span>AI meme generator (to be released)</span>
+              <span>AI social post & meme generator (coming soon)</span>
             </li>
             <li>
               <span className="check-icon">✓</span>
-              <span>gpt-5 model</span>
+              <span>Next-gen <strong>gpt-5</strong> frontier model</span>
             </li>
             <li>
               <span className="check-icon">✓</span>
-              <span>1-on-1 support</span>
+              <span>Dedicated 1-on-1 priority support</span>
             </li>
           </ul>
 

@@ -448,282 +448,86 @@ input:checked + .slider:before {
   }
 }
 
-/* ==========================================================================
-   VibeReply Modern Light Theme & Reference Image Pricing Section Styles
-   ========================================================================== */
-
-.vr-app-root {
-  background-color: #f8fafc;
-  color: #0f172a;
-  min-height: 100vh;
-  font-family: var(--font-plus-jakarta-sans), -apple-system, BlinkMacSystemFont, sans-serif;
+/* ------------------- Extension Download Buttons in Header ------------------- */
+.extension-cta-group {
   display: flex;
-  flex-direction: column;
-}
-
-/* ------------------- Navbar (Matching Reference Image) ------------------- */
-.vr-nav {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-}
-
-.vr-nav-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0.85rem 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.vr-logo {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  text-decoration: none;
-}
-
-.vr-logo-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.vr-logo-text {
-  font-size: 1.45rem;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-}
-
-.vr-logo-vibe {
-  color: #0f172a;
-}
-
-.vr-logo-reply {
-  color: #0284c7;
-}
-
-.vr-nav-links {
-  display: flex;
-  align-items: center;
-  gap: 2rem;
-}
-
-.vr-nav-links a {
-  color: #475569;
-  text-decoration: none;
-  font-size: 0.95rem;
-  font-weight: 500;
-  transition: color 0.15s ease;
-}
-
-.vr-nav-links a:hover {
-  color: #0284c7;
-}
-
-.vr-nav-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-/* Chrome & Edge Store Buttons */
-.vr-store-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  padding: 0.45rem 0.85rem;
-  background: #f1f5f9;
-  color: #334155;
-  border: 1px solid #cbd5e1;
-  border-radius: 9999px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  text-decoration: none;
-  transition: all 0.2s ease;
-}
-
-.vr-store-btn:hover {
-  background: #e2e8f0;
-  color: #0f172a;
-  border-color: #94a3b8;
-  transform: translateY(-1px);
-}
-
-.browser-icon {
-  flex-shrink: 0;
-}
-
-/* Try Free Pill Button (Matching Image) */
-.vr-try-free-btn {
-  padding: 0.5rem 1.25rem;
-  background: #0284c7;
-  color: #ffffff;
-  border: none;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.vr-try-free-btn:hover {
-  background: #0369a1;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
-}
-
-.vr-mobile-toggle {
-  display: none;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.25rem;
-}
-
-.vr-mobile-toggle .bar {
-  display: block;
-  width: 22px;
-  height: 2px;
-  margin: 5px 0;
-  background: #334155;
-  transition: all 0.2s ease;
-}
-
-/* ------------------- Hero Section ------------------- */
-.vr-main-content {
-  flex: 1;
-}
-
-.vr-hero-section {
-  max-width: 900px;
-  margin: 3.5rem auto 2.5rem;
-  padding: 0 1.5rem;
-  text-align: center;
-}
-
-.vr-hero-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.35rem 0.9rem;
-  background: #e0f2fe;
-  color: #0369a1;
-  border: 1px solid #bae6fd;
-  border-radius: 9999px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  margin-bottom: 1.5rem;
-}
-
-.vr-hero-title {
-  font-family: var(--font-plus-jakarta-sans), -apple-system, sans-serif !important;
-  font-size: 3rem;
-  font-weight: 800;
-  line-height: 1.15;
-  color: #0f172a !important;
-  background: none !important;
-  -webkit-background-clip: initial !important;
-  -webkit-text-fill-color: #0f172a !important;
-  letter-spacing: -0.03em;
-  margin-bottom: 1.25rem;
-  text-transform: none !important;
-  text-shadow: none !important;
-}
-
-.vr-hero-title .gradient-text {
-  background: linear-gradient(135deg, #0284c7 0%, #0d9488 100%) !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-}
-
-
-.vr-hero-subtitle {
-  font-size: 1.15rem;
-  color: #475569;
-  line-height: 1.6;
-  max-width: 720px;
-  margin: 0 auto 2rem;
-}
-
-.vr-hero-actions {
-  display: flex;
-  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: 1rem;
-  margin-bottom: 1.5rem;
+  margin-top: 1.75rem;
+  flex-wrap: wrap;
 }
 
-.vr-hero-btn {
+.ext-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.4rem;
-  border-radius: 10px;
-  font-size: 0.95rem;
+  gap: 0.6rem;
+  padding: 0.65rem 1.25rem;
+  background: rgba(255, 255, 255, 0.07);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+  font-size: 0.92rem;
   font-weight: 600;
   text-decoration: none;
+  backdrop-filter: blur(8px);
   transition: all 0.2s ease;
 }
 
-.chrome-cta {
-  background: #0284c7;
-  color: #ffffff;
-  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.3);
-}
-
-.chrome-cta:hover {
-  background: #0369a1;
+.ext-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(0, 242, 254, 0.4);
   transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 242, 254, 0.2);
 }
 
-.edge-cta {
-  background: #ffffff;
-  color: #0f172a;
-  border: 1px solid #cbd5e1;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+.ext-chrome:hover {
+  border-color: rgba(66, 133, 244, 0.6);
+  box-shadow: 0 4px 16px rgba(66, 133, 244, 0.25);
 }
 
-.edge-cta:hover {
-  background: #f8fafc;
-  border-color: #94a3b8;
-  transform: translateY(-2px);
+.ext-edge:hover {
+  border-color: rgba(0, 120, 215, 0.6);
+  box-shadow: 0 4px 16px rgba(0, 120, 215, 0.25);
 }
 
-.outline-cta {
-  background: transparent;
-  color: #0284c7;
-  border: 1px solid #0284c7;
-}
-
-.outline-cta:hover {
-  background: #e0f2fe;
-}
-
-.vr-hero-trust {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  font-size: 0.85rem;
-  color: #64748b;
-  margin-top: 1rem;
-}
-
-.vr-hero-trust .dot {
-  color: #cbd5e1;
-}
-
-/* ------------------- Pricing Section (Pixel-Perfect Reference Match) ------------------- */
+/* ------------------- Pricing Section (Matching Reference Image) ------------------- */
 .vr-pricing-section {
   max-width: 1140px;
-  margin: 2rem auto 5rem;
-  padding: 0 1.5rem;
+  margin: 5rem auto 3rem;
+  padding: 0 0.5rem;
+}
+
+.vr-pricing-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.vr-pricing-header .pricing-tag {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  background: rgba(0, 242, 254, 0.08);
+  border: 1px solid rgba(0, 242, 254, 0.2);
+  padding: 4px 14px;
+  border-radius: 9999px;
+  margin-bottom: 0.75rem;
+}
+
+.vr-pricing-header h2 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+}
+
+.vr-pricing-header p {
+  color: var(--fg-muted);
+  font-size: 1rem;
 }
 
 .vr-pricing-error {
@@ -764,19 +568,20 @@ input:checked + .slider:before {
   flex-direction: column;
   justify-content: space-between;
   position: relative;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  color: #0f172a;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .vr-pricing-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.07);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
 }
 
 /* Standard Highlighted Card */
 .vr-pricing-card.card-standard.popular {
   border: 2px solid #0284c7;
-  box-shadow: 0 8px 24px rgba(2, 132, 199, 0.12);
+  box-shadow: 0 8px 28px rgba(2, 132, 199, 0.2);
 }
 
 .popular-badge {
@@ -794,7 +599,7 @@ input:checked + .slider:before {
   display: flex;
   align-items: center;
   gap: 0.35rem;
-  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.4);
 }
 
 .card-header {
@@ -925,161 +730,17 @@ input:checked + .slider:before {
   box-shadow: 0 6px 18px rgba(249, 115, 22, 0.35);
 }
 
-/* ------------------- Features Section ------------------- */
-.vr-features-section {
-  max-width: 1140px;
-  margin: 4rem auto;
-  padding: 0 1.5rem;
-}
-
-.vr-section-header {
-  text-align: center;
-  max-width: 680px;
-  margin: 0 auto 3rem;
-}
-
-.section-tag {
-  display: inline-block;
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #0284c7;
-  margin-bottom: 0.5rem;
-}
-
-.vr-section-header h2 {
-  font-size: 2.2rem;
-  font-weight: 800;
-  color: #0f172a;
-  letter-spacing: -0.02em;
-  margin-bottom: 0.75rem;
-}
-
-.vr-section-header p {
-  font-size: 1.05rem;
-  color: #64748b;
-  line-height: 1.5;
-}
-
-.vr-features-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
-}
-
-.vr-feature-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 1.75rem;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.vr-feature-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
-}
-
-.feature-icon {
-  font-size: 2rem;
-  margin-bottom: 1rem;
-}
-
-.vr-feature-card h3 {
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: #0f172a;
-  margin-bottom: 0.5rem;
-}
-
-.vr-feature-card p {
-  font-size: 0.92rem;
-  color: #64748b;
-  line-height: 1.5;
-}
-
-/* ------------------- Interactive Playground Section ------------------- */
-.vr-playground-section {
-  max-width: 1140px;
-  margin: 4rem auto;
-  padding: 0 1.5rem;
-}
-
-/* ------------------- FAQ Section ------------------- */
-.vr-faq-section {
-  max-width: 800px;
-  margin: 4rem auto;
-  padding: 0 1.5rem;
-}
-
-.vr-faq-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
-}
-
-.vr-faq-item {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  padding: 1.25rem 1.5rem;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.vr-faq-item:hover {
-  border-color: #cbd5e1;
-}
-
-.vr-faq-item.expanded {
-  border-color: #0284c7;
-  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.08);
-}
-
-.vr-faq-question {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.vr-faq-question h4 {
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: #0f172a;
-}
-
-.faq-toggle-icon {
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: #0284c7;
-}
-
-.vr-faq-answer {
-  margin-top: 0.75rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid #f1f5f9;
-}
-
-.vr-faq-answer p {
-  font-size: 0.95rem;
-  color: #475569;
-  line-height: 1.6;
-}
-
-/* ------------------- Extension Modal ------------------- */
+/* Extension Modal */
 .vr-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.65);
-  backdrop-filter: blur(4px);
-  z-index: 999;
+  background: rgba(2, 2, 10, 0.75);
+  backdrop-filter: blur(6px);
+  z-index: 9999;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 1rem;
-  animation: fadeIn 0.2s ease-out;
 }
 
 .vr-modal-card {
@@ -1089,8 +750,8 @@ input:checked + .slider:before {
   width: 100%;
   padding: 2rem;
   position: relative;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-  animation: slideUp 0.25s ease-out;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  color: #0f172a;
 }
 
 .vr-modal-close {
@@ -1108,12 +769,6 @@ input:checked + .slider:before {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.15s ease;
-}
-
-.vr-modal-close:hover {
-  background: #e2e8f0;
-  color: #0f172a;
 }
 
 .vr-modal-header {
@@ -1201,98 +856,11 @@ input:checked + .slider:before {
   padding-top: 1rem;
 }
 
-/* ------------------- Footer ------------------- */
-.vr-footer {
-  background: #ffffff;
-  border-top: 1px solid #e2e8f0;
-  padding: 3.5rem 1.5rem 2rem;
-  margin-top: 4rem;
-}
-
-.vr-footer-content {
-  max-width: 1140px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 2rem;
-  padding-bottom: 2rem;
-  border-bottom: 1px solid #f1f5f9;
-}
-
-.vr-footer-brand p {
-  margin-top: 0.5rem;
-  font-size: 0.9rem;
-  color: #64748b;
-  max-width: 360px;
-}
-
-.vr-footer-links {
-  display: flex;
-  gap: 1.5rem;
-}
-
-.vr-footer-links a {
-  color: #475569;
-  text-decoration: none;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: color 0.15s ease;
-}
-
-.vr-footer-links a:hover {
-  color: #0284c7;
-}
-
-.vr-footer-bottom {
-  max-width: 1140px;
-  margin: 1.5rem auto 0;
-  text-align: center;
-  font-size: 0.85rem;
-  color: #94a3b8;
-}
-
-/* ------------------- Responsive Breakpoints ------------------- */
 @media (max-width: 1024px) {
   .vr-pricing-grid {
     grid-template-columns: 1fr;
-    max-width: 520px;
+    max-width: 500px;
     margin: 0 auto;
-  }
-  .vr-features-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 768px) {
-  .vr-nav-links {
-    display: none;
-  }
-  .vr-nav-links.open {
-    display: flex;
-    flex-direction: column;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: #ffffff;
-    padding: 1.5rem;
-    border-bottom: 1px solid #e2e8f0;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.05);
-    gap: 1.25rem;
-  }
-  .vr-mobile-toggle {
-    display: block;
-  }
-  .vr-store-btn {
-    display: none;
-  }
-  .vr-hero-title {
-    font-size: 2.25rem;
-  }
-  .vr-features-grid {
-    grid-template-columns: 1fr;
   }
 }
 
