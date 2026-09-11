@@ -97,11 +97,14 @@ teen kaam karta hai:
 
 Konsa adapter use hoga, ye current page ke hostname se decide hota hai (`getAdapterForHost()`).
 
-### Floating panel
+### Floating Grammarly-style Capsule Widget (`#vr-floating-icon`)
 
-Content script ek chhota floating icon/panel inject karta hai jo compose box ke paas dikhta hai.
-User isi se "Reply"/"Rewrite"/"Translate" trigger karta hai — panel `chrome.runtime.sendMessage()`
-se `MSG.GENERATE`/`MSG.TRANSLATE` bhejta hai aur response ko options ke roop me dikhata hai.
+Content script compose box ke paas ek sleek, modern **Grammarly-style floating capsule widget** inject karta hai:
+- **Pill/Capsule Design**: White rounded pill (`border-radius: 9999px`) with soft shadow and glow, active editor ke corner par seamlessly float karta hai.
+- **Power/Toggle Button**: Left me power icon (`⏻`) jo VibeReply ko temporarily pause ya reactivate karne ki suvidha deta hai.
+- **Brand Trigger**: Right me VibeReply circular badge (blue chat icon + spark) jisko click karne par AI reply options aur assistant panel open hota hai.
+- **Dark Floating Tooltip**: Hover karne par dark navy tooltip ("Open VibeReply.") with downward pointer arrow appear hota hai, bilkul Grammarly widget ki tarah.
+- **Status Badges & Spinner**: AI reply generate hone ke dauran loading spinner, naye messages aane par subtle pulse, aur recommendations aane par green indicator dot dikhata hai.
 
 ### Popup se bhi commands aa sakte hain
 

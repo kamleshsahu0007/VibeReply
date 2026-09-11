@@ -208,56 +208,76 @@ Custom tone poori tarah delete karta hai, ya default tone ke device-override ko 
 
 ---
 
-## `POST /api/stripe/create-checkout-session`
+## `POST /api/lemonsqueezy/create-checkout`
 
-PRO subscription ke liye Stripe Checkout Session link banata hai (Global reach: 135+ currencies, Cards, Apple Pay, Google Pay).
+Lemon Squeezy Merchant of Record hosted checkout session banata hai. Supports "standard" ($4.99/mo) aur "premium" ($7.99/mo) tiers.
 
-**Rate limit**: ⚠️ **abhi nahi hai** — dekho [15-known-issues-roadmap.md](15-known-issues-roadmap.md).
+**Rate limit**: haan (10 req/min per IP via `checkoutRateLimiter`)
 
 **Headers**: `X-Device-Id` **(required)**
 
-### Response — `200`
-
+### Request Body (optional)
 ```json
-{ "success": true, "url": "https://checkout.stripe.com/c/pay/cs_test_xxxxxxx" }
+{
+  "tier": "standard" // "standard" (default) | "premium"
+}
+```
+
+### Response — `200`
+```json
+{ "success": true, "url": "https://vibereply.lemonsqueezy.com/buy/xxxxxxx" }
 ```
 
 ### Error codes
-
+- `RATE_LIMITED` (429) — Too many checkout attempts
 - `VALIDATION_ERROR` (400) — `X-Device-Id` missing
-- `NOT_CONFIGURED` (503) — `STRIPE_PRICE_ID` env var set nahi hai
-- `INTERNAL_ERROR` (500) — Stripe API call fail
-
-Stripe recurring subscription create karta hai ("mode: subscription") jo indefinite until cancelled chalti hai. `allow_promotion_codes: true` enabled hai jisse global coupon/discount codes support hote hain. User checkout complete karke `APP_URL/?checkout=success` par redirect hota hai.
+- `NOT_CONFIGURED` (503) — Lemon Squeezy env vars missing
+- `INTERNAL_ERROR` (500) — Lemon Squeezy API call error
 
 ---
 
-## `POST /api/stripe/webhook`
+## `POST /api/lemonsqueezy/webhook`
 
-Stripe ke apne servers se call hota hai (browser/extension se kabhi nahi) — subscription lifecycle events yaha aate hain.
+Lemon Squeezy ke servers se call hota hai — subscription lifecycle events process karta hai.
 
-**Auth**: koi CORS nahi (server-to-server hai). `stripe-signature` header se HMAC signature verify hoti hai (`STRIPE_WEBHOOK_SECRET` se `stripe.webhooks.constructEvent()` dwara) — invalid signature = `400`.
+**Auth**: `x-signature` header verify hoti hai (`LEMONSQUEEZY_WEBHOOK_SECRET` se HMAC-SHA256 digest). Invalid signature = `400`.
 
 **Handled events**:
-
-| Event | Action |
-| --- | --- |
-| `checkout.session.completed` | Device ko `subscriptionStatus: "active"` set karta hai, aur `stripeCustomerId` aur `stripeSubscriptionId` store karta hai (`client_reference_id`/`metadata.deviceId` se) |
-| `customer.subscription.updated`, `customer.subscription.deleted` | Device ka status Stripe ke subscription status (`active`, `past_due`, `canceled`, etc.) se update karta hai (lookup `stripeSubscriptionId` se) |
+- `subscription_created`: Device ko `active` karta hai aur `subscriptionTier` set karta hai.
+- `subscription_updated`: Status aur tier sync karta hai.
+- `subscription_cancelled`: Status `cancelled` set karta hai.
+- `subscription_expired`: Status `expired` set karta hai.
+- `subscription_paused` / `subscription_resumed`.
 
 ### Response
+`{ "received": true }` (200)
 
-`{ "received": true }` (200) ya error object with matching status code.
+---
+
+## `POST /api/stripe/create-checkout-session`
+
+Legacy / Alternative Stripe Checkout Session endpoint.
 
 ---
 
 ## `GET /api/subscription-status`
 
-Device PRO subscriber hai ya nahi, check karta hai.
+Device subscriber hai ya nahi aur uska active plan tier kya hai (`free`, `standard`, `premium`), check karta hai.
 
-**Rate limit**: ⚠️ **abhi nahi hai**
+**Rate limit**: haan (60 req/min per IP via `subscriptionStatusRateLimiter`)
 
 **Headers**: `X-Device-Id` **(required)**
+
+### Response — `200`
+```json
+{
+  "success": true,
+  "subscribed": true,
+  "tier": "standard", // "free" | "standard" | "premium"
+  "status": "active"
+}
+```
+
 
 ### Response — `200`
 

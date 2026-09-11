@@ -116,6 +116,15 @@ const tonesWindowMs = parsePositiveInt(process.env.RATE_LIMIT_TONES_WINDOW_MS, 6
 // budget (or vice versa).
 export const tonesRateLimiter: RateLimiter = createSlidingWindowLimiter(tonesLimit, tonesWindowMs);
 
+const checkoutLimit = parsePositiveInt(process.env.RATE_LIMIT_CHECKOUT_REQUESTS, 10);
+const checkoutWindowMs = parsePositiveInt(process.env.RATE_LIMIT_CHECKOUT_WINDOW_MS, 60_000);
+export const checkoutRateLimiter: RateLimiter = createSlidingWindowLimiter(checkoutLimit, checkoutWindowMs);
+
+const statusLimit = parsePositiveInt(process.env.RATE_LIMIT_STATUS_REQUESTS, 60);
+const statusWindowMs = parsePositiveInt(process.env.RATE_LIMIT_STATUS_WINDOW_MS, 60_000);
+export const subscriptionStatusRateLimiter: RateLimiter = createSlidingWindowLimiter(statusLimit, statusWindowMs);
+
+
 /**
  * Extract a stable client identifier from request headers.
  * Falls back to "anonymous" so the limiter still applies.

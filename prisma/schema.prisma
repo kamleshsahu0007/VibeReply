@@ -18,12 +18,15 @@ model Device {
   toneProfiles ToneProfile[]
 
   // Stripe subscription state. All nullable — most devices never pay.
-  // subscriptionStatus mirrors Stripe's own status strings ("active",
-  // "trialing", "past_due", "canceled", "unpaid", "incomplete",
-  // "incomplete_expired", "paused"). Both "active" and "trialing" grant PRO
-  // access — see subscription.service.ts.
   stripeCustomerId       String?   @unique
   stripeSubscriptionId   String?   @unique
+
+  // Lemon Squeezy (Merchant of Record) subscription state.
+  lemonSqueezyCustomerId     String?   @unique
+  lemonSqueezySubscriptionId String?   @unique
+  subscriptionTier           String?   // "standard" | "premium"
+
+  // Status mirrors provider status ("active", "on_trial", "past_due", "cancelled", "expired", "paused")
   subscriptionStatus     String?
   subscriptionUpdatedAt  DateTime?
 }

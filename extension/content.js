@@ -682,20 +682,56 @@
       this.shadow.appendChild(themeContainer);
       this.themeContainer = themeContainer;
 
-      // Floating Icon
+      // Floating Grammarly-style Capsule
       this.floatingIcon = document.createElement('div');
       this.floatingIcon.id = 'vr-floating-icon';
       this.floatingIcon.innerHTML = `
-        <svg viewBox="0 0 24 24" width="16" height="16">
-          <path class="vr-logo-v" d="M4 6l8 12 8-12"/>
-        </svg>
-        <div class="vr-spinner"></div>
-        <div class="vr-badge vr-badge-suggest"></div>
-        <div class="vr-badge vr-badge-error"></div>
-        <div class="vr-badge vr-badge-new"></div>
+        <div class="vr-capsule" id="vr-capsule-body">
+          <button type="button" class="vr-capsule-toggle" id="vr-capsule-toggle" title="Pause or activate VibeReply">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+              <path d="M12 2v9M18.36 6.64a9 9 0 1 1-12.73 0" />
+            </svg>
+          </button>
+          <div class="vr-capsule-brand" id="vr-capsule-brand" title="Open VibeReply">
+            <div class="vr-brand-badge">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+                <rect width="24" height="24" rx="12" fill="#0EA5E9"/>
+                <path d="M13 5L8 13H12L11 19L17 11H13L14 5H13Z" fill="#FBBF24"/>
+              </svg>
+            </div>
+            <div class="vr-spinner"></div>
+            <div class="vr-badge vr-badge-suggest"></div>
+            <div class="vr-badge vr-badge-error"></div>
+            <div class="vr-badge vr-badge-new"></div>
+          </div>
+          <div class="vr-capsule-tooltip">
+            <span class="tooltip-text">Open VibeReply.</span>
+            <div class="tooltip-arrow"></div>
+          </div>
+        </div>
       `;
+
+      const toggleBtn = this.floatingIcon.querySelector('#vr-capsule-toggle');
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.isPaused = !this.isPaused;
+          this.floatingIcon.classList.toggle('vr-paused', this.isPaused);
+          const tooltipText = this.floatingIcon.querySelector('.tooltip-text');
+          if (tooltipText) {
+            tooltipText.textContent = this.isPaused ? 'VibeReply is paused.' : 'Open VibeReply.';
+          }
+        });
+      }
+
       this.floatingIcon.addEventListener('click', (e) => {
         e.stopPropagation();
+        if (this.isPaused) {
+          this.isPaused = false;
+          this.floatingIcon.classList.remove('vr-paused');
+          const tooltipText = this.floatingIcon.querySelector('.tooltip-text');
+          if (tooltipText) tooltipText.textContent = 'Open VibeReply.';
+        }
         this._togglePanel();
       });
       themeContainer.appendChild(this.floatingIcon);
@@ -832,10 +868,10 @@
       this.floatingIcon.style.display = 'flex';
 
       // Position floating icon inside editor bottom-right
-      let iconWidth = 28;
+      let iconWidth = 56;
       let iconHeight = 28;
       let top = rect.bottom - iconHeight - 6;
-      let left = rect.right - iconWidth - 6;
+      let left = rect.right - iconWidth - 8;
 
       // Handle small inputs
       if (rect.height < 36) {
@@ -1376,96 +1412,163 @@
     #vr-floating-icon {
       position: fixed;
       z-index: 2147483647;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: rgba(22, 27, 34, 0.85);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05);
       display: none;
       align-items: center;
       justify-content: center;
-      cursor: pointer;
       user-select: none;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s, border-color 0.2s;
+      transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    #vr-floating-icon:hover {
-      background: rgba(30, 36, 46, 0.95);
-      border-color: #8b5cf6;
-      transform: scale(1.1) rotate(5deg);
+
+    .vr-capsule {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      background: #ffffff;
+      border-radius: 9999px;
+      padding: 3px 4px 3px 7px;
+      gap: 5px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.06);
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    #vr-floating-icon:active {
-      transform: scale(0.95);
+    .vr-capsule:hover {
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25), 0 0 0 1.5px #0ea5e9;
+      transform: translateY(-1px);
     }
-    
-    .vr-logo-v {
-      fill: none;
-      stroke: #8b5cf6;
-      stroke-width: 2.5;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      transition: stroke 0.2s;
+    .vr-capsule:active {
+      transform: scale(0.97);
     }
-    #vr-floating-icon:hover .vr-logo-v {
-      stroke: #a78bfa;
+
+    .vr-capsule-toggle {
+      background: none;
+      border: none;
+      padding: 2px;
+      margin: 0;
+      color: #64748b;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: color 0.15s, background 0.15s;
     }
-    
-    .vr-badge {
+    .vr-capsule-toggle:hover {
+      color: #0f172a;
+      background: #f1f5f9;
+    }
+
+    #vr-floating-icon.vr-paused .vr-capsule-toggle {
+      color: #ef4444;
+    }
+    #vr-floating-icon.vr-paused .vr-brand-badge {
+      opacity: 0.45;
+      filter: grayscale(80%);
+    }
+
+    .vr-capsule-brand {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+
+    .vr-brand-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.18s;
+    }
+    .vr-capsule:hover .vr-brand-badge {
+      transform: scale(1.06);
+    }
+
+    /* Grammarly-style dark tooltip with down arrow */
+    .vr-capsule-tooltip {
       position: absolute;
-      top: 0px;
-      right: 0px;
+      bottom: calc(100% + 9px);
+      right: -2px;
+      background: #23283b;
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      padding: 6px 12px;
+      border-radius: 6px;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity 0.18s ease-out, transform 0.18s ease-out;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+    }
+    .tooltip-arrow {
+      position: absolute;
+      bottom: -4px;
+      right: 12px;
       width: 8px;
       height: 8px;
+      background: #23283b;
+      transform: rotate(45deg);
+    }
+    .vr-capsule:hover .vr-capsule-tooltip {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .vr-badge {
+      position: absolute;
+      top: -1px;
+      right: -1px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       display: none;
     }
     #vr-floating-icon[data-state="suggest"] .vr-badge-suggest {
       display: block;
       background: #10b981;
-      box-shadow: 0 0 8px #10b981;
+      box-shadow: 0 0 6px #10b981;
       animation: vr-pulse 2s infinite;
     }
     #vr-floating-icon[data-state="error"] .vr-badge-error {
       display: block;
       background: #ef4444;
-      box-shadow: 0 0 8px #ef4444;
+      box-shadow: 0 0 6px #ef4444;
     }
-    
+
     @keyframes vr-pulse {
       0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-      70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+      70% { transform: scale(1); box-shadow: 0 0 0 5px rgba(16, 185, 129, 0); }
       100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
     }
 
-    /* "New message" nudge — a soft ambient glow around the whole icon
-       rather than a corner dot, since this is meant to be noticed at a
-       glance without demanding attention like an error/alert would. */
-    #vr-floating-icon[data-state="new"] {
+    #vr-floating-icon[data-state="new"] .vr-capsule {
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2), 0 0 0 2px #0ea5e9, 0 0 14px rgba(14, 165, 233, 0.4);
       animation: vr-glow 2.4s ease-in-out infinite;
     }
     @keyframes vr-glow {
-      0%, 100% { box-shadow: 0 8px 24px rgba(0,0,0,0.35), 0 0 0 0 rgba(139, 92, 246, 0.45); }
-      50% { box-shadow: 0 8px 24px rgba(0,0,0,0.35), 0 0 14px 4px rgba(139, 92, 246, 0.55); }
+      0%, 100% { box-shadow: 0 2px 10px rgba(0,0,0,0.2), 0 0 0 2px #0ea5e9; }
+      50% { box-shadow: 0 2px 10px rgba(0,0,0,0.2), 0 0 0 2px #0ea5e9, 0 0 14px 2px rgba(14, 165, 233, 0.5); }
     }
 
     .vr-spinner {
       display: none;
-      width: 16px;
-      height: 16px;
-      border: 2px solid rgba(255, 255, 255, 0.1);
-      border-top-color: #8b5cf6;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(14, 165, 233, 0.2);
+      border-top-color: #0ea5e9;
       border-radius: 50%;
       animation: vr-spin 0.8s linear infinite;
     }
     #vr-floating-icon[data-state="loading"] .vr-spinner {
       display: block;
     }
-    #vr-floating-icon[data-state="loading"] svg {
+    #vr-floating-icon[data-state="loading"] .vr-brand-badge {
       display: none;
     }
-    
+
     @keyframes vr-spin {
       to { transform: rotate(360deg); }
     }
