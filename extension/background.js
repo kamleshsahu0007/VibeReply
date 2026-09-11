@@ -13,7 +13,7 @@ const CONFIG = {
     generate: '/api/generate-replies',
     tones: '/api/tones',
     feedback: '/api/v1/suggestions/feedback',
-    createCheckoutSession: '/api/stripe/create-checkout-session',
+    createCheckoutSession: '/api/lemonsqueezy/create-checkout',
     subscriptionStatus: '/api/subscription-status',
   },
   REQUEST_TIMEOUT_MS: 20_000,
@@ -394,22 +394,35 @@ async function handleClearAllConversations() {
   return { ok: true };
 }
 
-async function handleOpenCheckout() {
+async function handleOpenCheckout(payload = {}) {
   try {
-    const res = await apiFetch(CONFIG.ENDPOINTS.createCheckoutSession, { method: 'POST', body: {} });
+    const tier = payload?.tier || 'standard';
+    const res = await apiFetch(CONFIG.ENDPOINTS.createCheckoutSession, {
+      method: 'POST',
+      body: { tier },
+    });
     const data = await res.json();
     if (!data?.success || !data.url) {
-      return { ok: false, error: data?.error?.message || 'checkout_unavailable' };
+      // Fallback: open web pricing page with device query parameter
+      const base = await getApiBase();
+      const deviceId = await getDeviceId();
+      await chrome.tabs.create({ url: `${base}/#pricing?deviceId=${encodeURIComponent(deviceId)}` });
+      return { ok: true };
     }
     await chrome.tabs.create({ url: data.url });
-    // The user is about to pay in that new tab — don't let a cached "not
-    // subscribed" answer block them for up to SUBSCRIPTION_CACHE_TTL_MS
-    // after they come back.
+    // Invalidate subscription cache
     subscriptionCacheMemo = null;
     await chrome.storage.local.remove('subscriptionCache');
     return { ok: true };
   } catch (err) {
-    return { ok: false, error: err?.message || 'network_error' };
+    try {
+      const base = await getApiBase();
+      const deviceId = await getDeviceId();
+      await chrome.tabs.create({ url: `${base}/#pricing?deviceId=${encodeURIComponent(deviceId)}` });
+      return { ok: true };
+    } catch {
+      return { ok: false, error: err?.message || 'network_error' };
+    }
   }
 }
 
@@ -435,7 +448,7 @@ const ROUTES = {
   [MSG.SAVE_TONE]: (p) => handleSaveTone(p),
   [MSG.DELETE_TONE]: (p) => handleDeleteTone(p),
   [MSG.CLEAR_ALL_CONVERSATIONS]: () => handleClearAllConversations(),
-  [MSG.OPEN_CHECKOUT]: () => handleOpenCheckout(),
+  [MSG.OPEN_CHECKOUT]: (p) => handleOpenCheckout(p),
   [MSG.GET_STATS]: () => handleGetStats(),
   [MSG.PING]: () => ({ ok: true, data: { pong: Date.now() } }),
 };
