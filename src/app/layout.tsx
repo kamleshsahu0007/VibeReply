@@ -23,13 +23,30 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "VibeReply — AI Reply & Translate Assistant for Any Language, Any Chat App",
-  description: "VibeReply generates contextual AI replies and translates messages in 180+ languages, directly inside WhatsApp Web, LinkedIn, Gmail, Slack, Teams, and any text box on the web. Works for English, Spanish, German, Chinese, Hindi, Arabic, and every major world language.",
-  keywords: ["AI reply assistant", "multilingual chat assistant", "AI translation extension", "whatsapp web assistant", "linkedin AI replies", "browser extension", "custom writing tones", "privacy first AI", "AI reply generator for any language"],
+  metadataBase: new URL("https://vibe-reply-seven.vercel.app"),
+  title: "VibeReply — #1 AI Reply Generator & Smart Chat Assistant",
+  description: "Generate instant, contextual AI replies and translations in 180+ languages. Works directly inside WhatsApp Web, LinkedIn, Gmail, Slack, Teams, and any web text field. Free Chrome & Edge extension.",
+  keywords: [
+    "AI reply generator",
+    "AI chat assistant",
+    "smart reply AI Chrome extension",
+    "AI message generator",
+    "ChatGPT reply assistant",
+    "WhatsApp Web AI auto reply",
+    "LinkedIn AI message writer",
+    "AI email responder",
+    "multilingual AI chat assistant",
+    "AI tone changer for messages",
+    "best AI browser extension",
+    "Grammarly alternative for replies",
+    "contextual AI writer",
+    "instant message generator",
+    "free AI reply tool USA"
+  ],
   authors: [{ name: "VibeReply Team" }],
   openGraph: {
-    title: "VibeReply — AI Reply & Translate Assistant for Any Language, Any Chat App",
-    description: "Generate context-aware replies and translate messages in 180+ languages, right inside WhatsApp Web, LinkedIn, Gmail, Slack, Teams, and any input field on the web.",
+    title: "VibeReply — #1 AI Reply Generator & Smart Chat Assistant",
+    description: "Generate instant, context-aware AI replies and translations in 180+ languages inside WhatsApp Web, LinkedIn, Gmail, and any text box on the web.",
     url: "https://vibe-reply-seven.vercel.app",
     siteName: "VibeReply",
     locale: "en_US",
@@ -37,16 +54,26 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "VibeReply — AI Reply & Translate Assistant for Any Language, Any Chat App",
-    description: "Generate and translate replies in 180+ languages, directly inside WhatsApp Web, LinkedIn, and anywhere you type.",
+    title: "VibeReply — #1 AI Reply Generator & Smart Chat Assistant",
+    description: "Instant context-aware replies and real-time translation in 180+ languages inside WhatsApp Web, LinkedIn, Gmail, and anywhere you type.",
   },
   alternates: {
     canonical: "https://vibe-reply-seven.vercel.app",
   },
   icons: {
-    icon: "/icon.svg",
-    shortcut: "/favicon.svg",
-    apple: "/icon.svg",
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon-48x48.png", sizes: "48x48", type: "image/png" },
+      { url: "/favicon-96x96.png", sizes: "96x96", type: "image/png" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
+  verification: {
+    google: "google9598c0e36b5cd729.html",
   },
 };
 

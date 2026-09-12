@@ -68,6 +68,87 @@ export default async function Home() {
       {/* Live Neural Playground */}
       <Playground />
 
+      {/* SEO Feature Pillars: High-Intent Keyword Architecture */}
+      <section style={{ margin: "4.5rem 0 2rem" }}>
+        <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
+          <div className="vr-card-badge" style={{ marginBottom: "0.75rem" }}>Next-Gen Intelligence</div>
+          <h2 style={{ fontFamily: "var(--font-space-grotesk), sans-serif", fontSize: "2rem", fontWeight: 700, color: "#ffffff", marginBottom: "0.75rem" }}>
+            Why VibeReply is the #1 AI Reply Generator
+          </h2>
+          <p style={{ color: "var(--fg-muted)", maxWidth: "680px", margin: "0 auto", fontSize: "1rem", lineHeight: 1.6 }}>
+            Supercharge your communication with contextual AI responses, automated language translation, and customizable tones inside WhatsApp Web, LinkedIn, and Gmail.
+          </p>
+        </div>
+
+        <div className="vr-about-grid" style={{ margin: "0 0 2rem" }}>
+          <div className="vr-about-card">
+            <span className="vr-card-badge">Universal Integration</span>
+            <h3 style={{ color: "#ffffff", marginBottom: "0.6rem" }}>WhatsApp Web, LinkedIn & Gmail AI</h3>
+            <p style={{ color: "var(--fg-muted)", fontSize: "0.92rem", lineHeight: 1.6 }}>
+              VibeReply runs directly alongside your active chat inputs. Click the floating prompt or tap hotkeys to instantly draft contextual replies without switching tabs or copying messages to external apps.
+            </p>
+          </div>
+
+          <div className="vr-about-card">
+            <span className="vr-card-badge">Precision Tones</span>
+            <h3 style={{ color: "#ffffff", marginBottom: "0.6rem" }}>Custom Tone Calibration</h3>
+            <p style={{ color: "var(--fg-muted)", fontSize: "0.92rem", lineHeight: 1.6 }}>
+              Calibrate Formality, Warmth, Conciseness, and Directness to match your exact personal or brand voice. Switch seamlessly between Executive, Friendly, Persuasive, and Concise styles.
+            </p>
+          </div>
+
+          <div className="vr-about-card">
+            <span className="vr-card-badge">Global Polyglot</span>
+            <h3 style={{ color: "#ffffff", marginBottom: "0.6rem" }}>180+ Languages Auto-Translation</h3>
+            <p style={{ color: "var(--fg-muted)", fontSize: "0.92rem", lineHeight: 1.6 }}>
+              Communicate effortlessly with international clients. VibeReply detects incoming messages in Spanish, German, French, Chinese, Japanese, Hindi, and 180+ languages, showing you meaning and drafting native-level replies.
+            </p>
+          </div>
+
+          <div className="vr-about-card">
+            <span className="vr-card-badge">Privacy First</span>
+            <h3 style={{ color: "#ffffff", marginBottom: "0.6rem" }}>Client-Side Zero Data Retention</h3>
+            <p style={{ color: "var(--fg-muted)", fontSize: "0.92rem", lineHeight: 1.6 }}>
+              Your private conversations stay private. VibeReply strips sensitive personal data (phones, emails, credit cards) client-side before generation and never stores your conversation logs on cloud servers.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Frequently Asked Questions: Rich Google Search Snippet Alignment */}
+      <section className="vr-faq-section" style={{ margin: "2rem 0 3.5rem" }}>
+        <h3>Frequently Asked Questions</h3>
+        <div className="vr-faq-grid">
+          <div className="vr-faq-card">
+            <h4>What is VibeReply and how does it work?</h4>
+            <p>
+              VibeReply is an AI-powered smart reply assistant available as a Google Chrome and Microsoft Edge extension. It analyzes the message you are replying to and generates high-impact, context-aware responses in seconds.
+            </p>
+          </div>
+
+          <div className="vr-faq-card">
+            <h4>Can I use VibeReply on WhatsApp Web and LinkedIn?</h4>
+            <p>
+              Yes! VibeReply has native deep integrations for WhatsApp Web, LinkedIn Messaging, Gmail, Slack, and Microsoft Teams, as well as a universal floating mode that works in any web input field.
+            </p>
+          </div>
+
+          <div className="vr-faq-card">
+            <h4>How is VibeReply different from Grammarly or ChatGPT?</h4>
+            <p>
+              While Grammarly fixes spelling and ChatGPT requires copying text back and forth, VibeReply reads conversational context directly inside your chat, applies your custom tones, and translates across 180+ languages in real time.
+            </p>
+          </div>
+
+          <div className="vr-faq-card">
+            <h4>Is VibeReply free to try in the US and worldwide?</h4>
+            <p>
+              Yes. You can start instantly with a 30-day Free Trial with zero credit card required. Free tier accounts receive complimentary AI replies every day forever.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Sleek Plans & Pricing Preview Banner */}
       <div className="vr-pricing-banner">
         <div className="vr-banner-content">
