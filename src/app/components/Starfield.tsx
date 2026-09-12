@@ -15,15 +15,27 @@ export default function Starfield() {
     let animationFrameId: number;
     let width = (canvas.width = window.innerWidth);
     let height = (canvas.height = window.innerHeight);
+    let isVisible = true;
+    let lastTime = 0;
+    const FRAME_INTERVAL = 1000 / 40; // Max 40fps for high efficiency & zero lag
 
     const handleResize = () => {
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
     };
-    window.addEventListener("resize", handleResize);
+    window.addEventListener("resize", handleResize, { passive: true });
 
-    const STAR_COUNT = 150;
-    const SPEED = 2.5;
+    const handleVisibility = () => {
+      isVisible = !document.hidden;
+      if (isVisible) {
+        lastTime = performance.now();
+        animationFrameId = requestAnimationFrame(animate);
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    const STAR_COUNT = 55;
+    const SPEED = 2.2;
     const stars: { x: number; y: number; z: number; px: number; py: number }[] = [];
 
     // Initialize stars
@@ -42,7 +54,19 @@ export default function Starfield() {
       });
     }
 
-    const animate = () => {
+    const animate = (time?: number) => {
+      if (!isVisible) return;
+
+      const now = time || performance.now();
+      const elapsed = now - lastTime;
+
+      if (elapsed < FRAME_INTERVAL) {
+        animationFrameId = requestAnimationFrame(animate);
+        return;
+      }
+
+      lastTime = now - (elapsed % FRAME_INTERVAL);
+
       // Draw trailing fade background to create velocity blur
       ctx.fillStyle = "rgba(2, 2, 10, 0.25)";
       ctx.fillRect(0, 0, width, height);
@@ -82,16 +106,14 @@ export default function Starfield() {
           y < height
         ) {
           ctx.beginPath();
-          // Fade in star as it approaches the screen
           const opacity = Math.min(1, (1 - star.z / width) * 1.5);
           ctx.strokeStyle = `rgba(0, 242, 254, ${opacity})`;
-          ctx.lineWidth = Math.min(2.5, (1 - star.z / width) * 3);
+          ctx.lineWidth = Math.min(2, (1 - star.z / width) * 2.5);
           ctx.moveTo(star.px, star.py);
           ctx.lineTo(x, y);
           ctx.stroke();
         }
 
-        // Cache coordinates for next frame trail calculation
         star.px = x;
         star.py = y;
       }
@@ -99,10 +121,12 @@ export default function Starfield() {
       animationFrameId = requestAnimationFrame(animate);
     };
 
+    lastTime = performance.now();
     animate();
 
     return () => {
       window.removeEventListener("resize", handleResize);
+      document.removeEventListener("visibilitychange", handleVisibility);
       cancelAnimationFrame(animationFrameId);
     };
   }, []);
@@ -119,6 +143,8 @@ export default function Starfield() {
         zIndex: -2,
         pointerEvents: "none",
         display: "block",
+        transform: "translateZ(0)",
+        willChange: "transform",
       }}
     />
   );

@@ -48,19 +48,20 @@ body {
   background-size: 100% 100%, 50px 50px, 50px 50px;
 }
 
-/* Cybernetic Floating Background Lights */
+/* Cybernetic Floating Background Lights — Optimized for 120fps GPU performance */
 body::before {
   content: "";
   position: absolute;
   top: 10%;
   left: 5%;
-  width: 450px;
-  height: 450px;
-  background: radial-gradient(circle, rgba(0, 242, 254, 0.08) 0%, transparent 70%);
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(0, 242, 254, 0.08) 0%, rgba(0, 242, 254, 0.03) 45%, transparent 70%);
   z-index: -1;
-  filter: blur(80px);
   pointer-events: none;
-  animation: pulseLight 15s infinite alternate;
+  will-change: transform;
+  transform: translateZ(0);
+  animation: pulseLight 16s infinite alternate ease-in-out;
 }
 
 body::after {
@@ -68,18 +69,19 @@ body::after {
   position: absolute;
   bottom: 10%;
   right: 5%;
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, rgba(124, 58, 237, 0.06) 0%, transparent 70%);
+  width: 550px;
+  height: 550px;
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.07) 0%, rgba(124, 58, 237, 0.02) 45%, transparent 70%);
   z-index: -1;
-  filter: blur(100px);
   pointer-events: none;
-  animation: pulseLight 18s infinite alternate-reverse;
+  will-change: transform;
+  transform: translateZ(0);
+  animation: pulseLight 20s infinite alternate-reverse ease-in-out;
 }
 
 @keyframes pulseLight {
-  0% { transform: translateY(0px) scale(1); opacity: 0.7; }
-  100% { transform: translateY(-40px) scale(1.1); opacity: 1; }
+  0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.7; }
+  100% { transform: translate3d(0, -35px, 0) scale(1.08); opacity: 1; }
 }
 
 .container {
@@ -1449,5 +1451,38 @@ input:checked + .slider:before {
     gap: 0.75rem;
   }
 }
+
+/* Brand Logo Master Polish — True Global Elite Standard */
+.vr-brand-logo {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+}
+
+.vr-brand-logo:hover {
+  transform: translateY(-1px);
+}
+
+.vr-brand-logo svg {
+  transition: filter 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.vr-brand-logo:hover svg {
+  filter: drop-shadow(0 0 16px rgba(0, 242, 254, 0.65)) drop-shadow(0 0 6px rgba(139, 92, 246, 0.4));
+  transform: scale(1.05);
+}
+
+.vr-brand-logo .vr-logo-text {
+  color: #ffffff !important;
+  transition: text-shadow 0.25s ease, opacity 0.2s ease;
+  position: relative;
+}
+
+.vr-brand-logo:hover .vr-logo-text {
+  color: #ffffff !important;
+  text-shadow: 0 0 16px rgba(255, 255, 255, 0.45), 0 0 28px rgba(0, 242, 254, 0.25);
+}
+
 
 

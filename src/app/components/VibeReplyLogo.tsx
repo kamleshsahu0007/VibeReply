@@ -24,7 +24,7 @@ export default function VibeReplyLogo({
       style={{
         display: "inline-flex",
         alignItems: "center",
-        gap: `${Math.round(size * 0.35)}px`,
+        gap: `${Math.round(size * 0.28)}px`,
         textDecoration: "none",
         userSelect: "none",
       }}
@@ -85,10 +85,12 @@ export default function VibeReplyLogo({
             display: "inline-flex",
             alignItems: "center",
             lineHeight: 1,
+            color: "#FFFFFF",
+            WebkitFontSmoothing: "antialiased",
+            textRendering: "optimizeLegibility",
           }}
         >
-          <span style={{ color: "#00F2FE" }}>Vibe</span>
-          <span style={{ color: "#FFFFFF" }}>Reply</span>
+          VibeReply
         </span>
       )}
     </div>
