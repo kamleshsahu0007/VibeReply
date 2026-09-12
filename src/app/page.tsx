@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Playground from "@/app/components/Playground";
 import Starfield from "@/app/components/Starfield";
-import PricingSection from "@/app/components/PricingSection";
+import Footer from "@/app/components/Footer";
 
 export const dynamic = "force-dynamic";
 
@@ -61,19 +61,28 @@ export default async function Home() {
         </div>
       </header>
 
-      {/* Original Live Neural Playground */}
+      {/* Live Neural Playground */}
       <Playground />
 
-      {/* Multi-Tier Pricing Section matching reference image */}
-      <PricingSection />
+      {/* Sleek Plans & Pricing Preview Banner */}
+      <div className="vr-pricing-banner">
+        <div className="vr-banner-content">
+          <h3>
+            <span>Flexible Plans for High-Impact Messaging</span>
+            <span className="vr-banner-pill">30-Day Free Trial</span>
+          </h3>
+          <p>
+            Start free with zero credit card required. Upgrade anytime for unlimited replies, custom tones & GPT-5 intelligence.
+          </p>
+        </div>
+        <Link href="/pricing" className="vr-banner-btn">
+          <span>View Plans & Pricing</span>
+          <span>→</span>
+        </Link>
+      </div>
 
-      {/* Original Footer */}
-      <footer className="footer">
-        <p>
-          VibeReply Engine • Systems Operations Active ·{" "}
-          <Link href="/privacy" style={{ color: "inherit" }}>Privacy Policy</Link>
-        </p>
-      </footer>
+      {/* Enterprise Multi-Column Footer */}
+      <Footer />
     </div>
   );
 }

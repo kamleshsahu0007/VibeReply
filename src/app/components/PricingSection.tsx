@@ -3,7 +3,11 @@
 import React, { useState } from "react";
 import ExtensionModal from "./ExtensionModal";
 
-export default function PricingSection() {
+interface PricingSectionProps {
+  showHeader?: boolean;
+}
+
+export default function PricingSection({ showHeader = true }: PricingSectionProps = {}) {
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isExtensionModalOpen, setIsExtensionModalOpen] = useState(false);
@@ -62,11 +66,13 @@ export default function PricingSection() {
         </div>
       )}
 
-      <div className="vr-pricing-header">
-        <span className="pricing-tag">Simple & Transparent</span>
-        <h2>Choose Your Plan</h2>
-        <p>Start free with no credit card required. Upgrade anytime for unlimited access.</p>
-      </div>
+      {showHeader && (
+        <div className="vr-pricing-header">
+          <span className="pricing-tag">Simple & Transparent</span>
+          <h2>Choose Your Plan</h2>
+          <p>Start free with no credit card required. Upgrade anytime for unlimited access.</p>
+        </div>
+      )}
 
       <div className="vr-pricing-grid">
         {/* 1. Free Trial Card */}

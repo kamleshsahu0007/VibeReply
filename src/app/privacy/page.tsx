@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Footer from "@/app/components/Footer";
 
 export const metadata: Metadata = {
   title: "Privacy Policy — VibeReply",
@@ -102,6 +103,8 @@ export default function PrivacyPolicyPage() {
           </Link>
         </div>
       </section>
+
+      <Footer />
     </div>
   );
 }
