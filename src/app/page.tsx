@@ -2,6 +2,7 @@ import Link from "next/link";
 import Playground from "@/app/components/Playground";
 import Starfield from "@/app/components/Starfield";
 import Footer from "@/app/components/Footer";
+import VibeReplyLogo from "@/app/components/VibeReplyLogo";
 
 export const dynamic = "force-dynamic";
 
@@ -13,8 +14,11 @@ export default async function Home() {
     <div className="container">
       <Starfield />
 
-      {/* Original Header preserved with extension buttons */}
+      {/* Header with Iconic Brandmark & Extension Buttons */}
       <header>
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: "1.25rem" }}>
+          <VibeReplyLogo size={46} showText={false} />
+        </div>
         <div className="badge-featured">
           <span className="pulse-dot" />
           Neural Core v2.50

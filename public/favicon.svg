@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40" fill="none">
+  <defs>
+    <linearGradient id="vr-favicon-grad" x1="4" y1="4" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#00F2FE"/>
+      <stop offset="0.55" stop-color="#38BDF8"/>
+      <stop offset="1" stop-color="#8B5CF6"/>
+    </linearGradient>
+  </defs>
+  <rect width="40" height="40" rx="10" fill="#02020A"/>
+  <path d="M 20 6 C 12.27 6 6 12.27 6 20 C 6 22.88 6.87 25.55 8.37 27.76 L 6.5 33.5 L 12.48 31.72 C 14.69 33.14 17.26 34 20 34 C 27.73 34 34 27.73 34 20 C 34 12.27 27.73 6 20 6 Z"
+        fill="#070D1F"
+        stroke="url(#vr-favicon-grad)"
+        stroke-width="2.5"
+        stroke-linejoin="round"/>
+  <path d="M 10.5 20.5 H 14 L 16.5 15.5 L 19.5 25.5 L 23.5 12.5 L 26.5 22 L 28 19 H 29.5"
+        stroke="url(#vr-favicon-grad)"
+        stroke-width="2.25"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+  <circle cx="29.5" cy="19" r="1.25" fill="#00F2FE"/>
+</svg>

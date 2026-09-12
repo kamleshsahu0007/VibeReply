@@ -42,7 +42,12 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: "https://vibe-reply-seven.vercel.app",
-  }
+  },
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/favicon.svg",
+    apple: "/icon.svg",
+  },
 };
 
 const jsonLd = {

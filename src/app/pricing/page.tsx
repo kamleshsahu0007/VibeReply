@@ -3,6 +3,7 @@ import Link from "next/link";
 import Starfield from "@/app/components/Starfield";
 import PricingSection from "@/app/components/PricingSection";
 import Footer from "@/app/components/Footer";
+import VibeReplyLogo from "@/app/components/VibeReplyLogo";
 
 export const metadata: Metadata = {
   title: "Plans & Pricing — VibeReply",
@@ -23,7 +24,7 @@ export default function PricingPage() {
       <div className="vr-top-nav-bar">
         <Link href="/" className="vr-back-link">
           <span>←</span>
-          <span>Back to Neural Assistant</span>
+          <VibeReplyLogo size={22} showText={true} />
         </Link>
         <span className="vr-trust-chip">⚡ Global Merchant of Record (Lemon Squeezy)</span>
       </div>

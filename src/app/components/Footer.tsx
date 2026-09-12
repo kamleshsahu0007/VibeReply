@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import VibeReplyLogo from "./VibeReplyLogo";
 
 export default function Footer() {
   const chromeUrl = process.env.NEXT_PUBLIC_CHROME_STORE_URL || "https://chromewebstore.google.com/";
@@ -13,7 +14,9 @@ export default function Footer() {
         {/* Brand & Systems Column */}
         <div className="vr-footer-col vr-footer-brand-col">
           <div className="vr-footer-logo-row">
-            <span className="vr-footer-logo">VibeReply</span>
+            <Link href="/" style={{ textDecoration: "none" }}>
+              <VibeReplyLogo size={26} />
+            </Link>
             <span className="vr-footer-status-pill">
               <span className="pulse-dot" />
               SYSTEMS ACTIVE • v2.50

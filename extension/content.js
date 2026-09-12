@@ -694,9 +694,11 @@
           </button>
           <div class="vr-capsule-brand" id="vr-capsule-brand" title="Open VibeReply">
             <div class="vr-brand-badge">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
-                <rect width="24" height="24" rx="12" fill="#0EA5E9"/>
-                <path d="M13 5L8 13H12L11 19L17 11H13L14 5H13Z" fill="#FBBF24"/>
+              <svg viewBox="0 0 40 40" width="18" height="18" fill="none">
+                <circle cx="20" cy="20" r="19" fill="#060A18" stroke="#00F2FE" stroke-width="2.5"/>
+                <path d="M 9 20.5 H 13 L 15.5 15 L 19 26 L 23 12 L 26 22.5 L 28 19 H 30.5"
+                      stroke="#00F2FE" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="30.5" cy="19" r="1.5" fill="#38BDF8"/>
               </svg>
             </div>
             <div class="vr-spinner"></div>
