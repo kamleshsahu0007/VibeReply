@@ -10,6 +10,19 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://vibe-reply-seven.vercel.app/about",
   },
+  openGraph: {
+    title: "About VibeReply — The Contextual AI Messaging Companion",
+    description: "Learn how VibeReply redefines messaging intelligence with local PII redaction and 180+ languages.",
+    url: "https://vibe-reply-seven.vercel.app/about",
+    siteName: "VibeReply",
+    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "About VibeReply — The Contextual AI Messaging Companion",
+    description: "Learn how VibeReply redefines messaging intelligence with local PII redaction and 180+ languages.",
+    images: ["/og-image.png"],
+  },
 };
 
 export const dynamic = "force-dynamic";

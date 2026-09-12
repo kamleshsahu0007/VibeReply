@@ -11,6 +11,19 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://vibe-reply-seven.vercel.app/pricing",
   },
+  openGraph: {
+    title: "VibeReply Plans & Pricing — 30-Day Free Trial",
+    description: "Start free with zero credit card required. Flexible pricing for professionals and global teams across WhatsApp Web, LinkedIn, and Gmail.",
+    url: "https://vibe-reply-seven.vercel.app/pricing",
+    siteName: "VibeReply",
+    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "VibeReply Plans & Pricing — 30-Day Free Trial",
+    description: "Start free with zero credit card required. Flexible plans for high-impact AI messaging.",
+    images: ["/og-image.png"],
+  },
 };
 
 export const dynamic = "force-dynamic";

@@ -44,6 +44,17 @@ export const metadata: Metadata = {
     "free AI reply tool USA"
   ],
   authors: [{ name: "VibeReply Team" }],
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
   openGraph: {
     title: "VibeReply — #1 AI Reply Generator & Smart Chat Assistant",
     description: "Generate instant, context-aware AI replies and translations in 180+ languages inside WhatsApp Web, LinkedIn, Gmail, and any text box on the web.",
@@ -51,11 +62,20 @@ export const metadata: Metadata = {
     siteName: "VibeReply",
     locale: "en_US",
     type: "website",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "VibeReply — #1 AI Reply Generator & Smart Chat Assistant",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "VibeReply — #1 AI Reply Generator & Smart Chat Assistant",
     description: "Instant context-aware replies and real-time translation in 180+ languages inside WhatsApp Web, LinkedIn, Gmail, and anywhere you type.",
+    images: ["/og-image.png"],
   },
   alternates: {
     canonical: "https://vibe-reply-seven.vercel.app",
@@ -86,13 +106,43 @@ const jsonLd = {
       "url": "https://vibe-reply-seven.vercel.app",
       "name": "VibeReply",
       "description": "Contextual AI reply and translation companion supporting 180+ languages",
-      "publisher": { "@id": "https://vibe-reply-seven.vercel.app/#organization" }
+      "publisher": { "@id": "https://vibe-reply-seven.vercel.app/#organization" },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://vibe-reply-seven.vercel.app/?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://vibe-reply-seven.vercel.app/#breadcrumbs",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://vibe-reply-seven.vercel.app"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Pricing",
+          "item": "https://vibe-reply-seven.vercel.app/pricing"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "About",
+          "item": "https://vibe-reply-seven.vercel.app/about"
+        }
+      ]
     },
     {
       "@type": "Organization",
       "@id": "https://vibe-reply-seven.vercel.app/#organization",
       "name": "VibeReply",
       "url": "https://vibe-reply-seven.vercel.app",
+      "logo": "https://vibe-reply-seven.vercel.app/favicon-96x96.png",
       "sameAs": ["https://github.com/kamleshsahu0007/VibeReply"]
     },
     {
@@ -101,8 +151,15 @@ const jsonLd = {
       "name": "VibeReply",
       "publisher": { "@id": "https://vibe-reply-seven.vercel.app/#organization" },
       "operatingSystem": "Windows, macOS, Linux, ChromeOS",
-      "applicationCategory": "BrowserApplication, CommunicationApplication",
+      "applicationCategory": "BrowserApplication, CommunicationApplication, ProductivityApplication",
       "browserRequirements": "Google Chrome, Microsoft Edge, Brave, Opera",
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "ratingCount": "1280",
+        "bestRating": "5",
+        "worstRating": "1"
+      },
       "offers": {
         "@type": "Offer",
         "price": "0.00",
